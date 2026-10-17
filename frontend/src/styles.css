@@ -1,0 +1,82 @@
+:root {
+    --store-accent: #ffb629;
+    --store-accent-strong: #d98600;
+    --store-text: #111111;
+    --store-muted: #85817d;
+    --store-background: #ffffff;
+    --store-hero-background: #f7efed;
+    --store-input-background: #f5f4f1;
+    --store-border: #eeeeee;
+    --store-hover: #faf8f5;
+    --store-danger: #b33b34;
+    --store-radius: 4px;
+    --store-container: 1410px;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-width: 320px;
+    background: var(--store-background);
+}
+
+body {
+    min-width: 320px;
+    margin: 0;
+    background: var(--store-background);
+    color: var(--store-text);
+    font-family: "Space Grotesk", "Segoe UI", sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+    -webkit-tap-highlight-color: transparent;
+}
+
+a {
+    color: inherit;
+}
+
+img {
+    max-width: 100%;
+}
+
+.main-content {
+    min-height: 50vh;
+    margin: 0;
+}
+
+.main-content:not(.home-shell):not(.cinematic-shell) {
+    width: min(100%, var(--store-container));
+    margin: 0 auto;
+}
+
+.main-content.home-shell {
+    width: 100%;
+    max-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
