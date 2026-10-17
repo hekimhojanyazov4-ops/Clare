@@ -17,10 +17,7 @@ import "./Home.css";
 
 /* ------------------------------------------------------------------
    Content
-   Only one image asset exists today, so slides and tiles reuse
-   HERO_IMAGE with different crops and shapes. Swap the `image` fields
-   for your own photos whenever you have them.
------------------------------------------------------------------- */
+------------------------------------------------------------------- */
 
 const SLIDE_DURATION = 6500;
 
@@ -85,10 +82,34 @@ const BENEFITS = [
 ];
 
 const CATEGORIES = [
-    { name: "Women", note: "New season knitwear and outerwear", tone: "photo" },
-    { name: "Men", note: "Tailored everyday basics", tone: "sand" },
-    { name: "Accessories", note: "The finishing touches", tone: "ink" },
-    { name: "Sale", note: "Up to 40% off selected styles", tone: "amber" },
+    {
+        name: "Women",
+        note: "New season knitwear and outerwear",
+        tone: "photo",
+        image: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=85",
+        imagePosition: "center 35%",
+    },
+    {
+        name: "Men",
+        note: "Tailored everyday basics",
+        tone: "sand",
+        image: "https://images.unsplash.com/photo-1516257984-b1b4d707412e?auto=format&fit=crop&w=900&q=85",
+        imagePosition: "center 35%",
+    },
+    {
+        name: "Accessories",
+        note: "The finishing touches",
+        tone: "ink",
+        image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=900&q=85",
+        imagePosition: "center 50%",
+    },
+    {
+        name: "Sale",
+        note: "Up to 40% off selected styles",
+        tone: "amber",
+        image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=85",
+        imagePosition: "center 45%",
+    },
 ];
 
 const STATS = [
@@ -424,7 +445,7 @@ const CategoryBanners = () => (
         </div>
 
         <div className="cat-grid">
-            {CATEGORIES.map(({ name, note, tone }, i) => {
+            {CATEGORIES.map(({ name, note, tone, image, imagePosition }, i) => {
                 const [direction, delay] = TILE_REVEAL[i % TILE_REVEAL.length];
 
                 return (
@@ -434,9 +455,14 @@ const CategoryBanners = () => (
                         className={`cat-tile cat-${tone}`}
                         {...rv(direction, delay)}
                     >
-                        {tone === "photo" && (
-                            <img className="cat-photo" src={HERO_IMAGE} alt="" loading="lazy" />
-                        )}
+                        <img
+                            className="cat-photo"
+                            src={image}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            style={{ objectPosition: imagePosition }}
+                        />
                         <span className="cat-watermark" aria-hidden="true">{name}</span>
                         <span className="cat-copy">
                             <strong>{name}</strong>

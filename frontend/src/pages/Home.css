@@ -545,7 +545,7 @@
     padding: 26px;
     overflow: hidden;
     border-radius: 4px;
-    color: var(--ink);
+    color: #fff;
     text-decoration: none;
     isolation: isolate;
 }

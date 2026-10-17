@@ -1,37 +1,21 @@
-# --- BACKEND (Python / Node.js) ---
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-ENV/
-env/
-*.egg-info/
-dist/
-build/
-node_modules/       # If your backend uses Node.js
+// BACKEND
 
-# --- FRONTEND (React, Vite, Next.js, etc.) ---
-frontend/node_modules/
-frontend/dist/
-frontend/build/
-.next/
-.nuxt/
-
-# --- IDEs & EDITORS ---
-.idea/
-.vscode/
-.cursor/
-*.swp
-*.swo
-
-# --- ENVIRONMENT & CREDENTIALS ---
-.env
-.env.local
+backend/env
 backend/.env
-frontend/.env
+backend/.env.local
+backend/db.sqlite3
 
-# --- OS GENERATED ---
-.DS_Store
-Thumbs.db
-*.log
+
+
+// FRONTEND
+
+frontend/.env
+frontend/package-lock.json
+frontend/package.json
+frontend/yarn.lock
+frontend/tailwind.config.js
+frontend/postcss.config.js
+frontend/vite.config.js
+frontend/README.md
+frontend/node_modules/
+LICENSE
