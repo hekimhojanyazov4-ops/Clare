@@ -12,6 +12,7 @@ import {
 
 import { getProducts } from "../api";
 import { resolveProductImage } from "../utils/productImage";
+import { useSitePreferences } from "../context/SitePreferencesContext";
 import HERO_IMAGE from "../assets/clare-fashion-hero.jpg";
 import "./Home.css";
 
@@ -276,6 +277,7 @@ const CountUp = ({ end, suffix = "", duration = 1800 }) => {
 ------------------------------------------------------------------ */
 
 const HeroCarousel = () => {
+    const { t } = useSitePreferences();
     const [index, setIndex] = useState(0);
     const [paused, setPaused] = useState(false);
     const [engaged, setEngaged] = useState(false); // hover or keyboard focus inside
@@ -290,7 +292,7 @@ const HeroCarousel = () => {
             className="hero-carousel"
             data-theme={HERO_SLIDES[index].theme}
             aria-roledescription="carousel"
-            aria-label="Featured collections"
+            aria-label={t("Featured collections")}
             onMouseEnter={() => setEngaged(true)}
             onMouseLeave={() => setEngaged(false)}
             onFocus={() => setEngaged(true)}
@@ -311,17 +313,17 @@ const HeroCarousel = () => {
                         >
                             <div className="hero-copy">
                                 <p className="hero-label rise" style={{ "--d": "100ms" }}>
-                                    {slide.label}
+                                    {t(slide.label)}
                                 </p>
 
                                 {i === 0 ? (
-                                    <h1 className="hero-title">{renderLines(slide)}</h1>
+                                    <h1 className="hero-title">{renderLines(slide, t)}</h1>
                                 ) : (
-                                    <h2 className="hero-title">{renderLines(slide)}</h2>
+                                    <h2 className="hero-title">{renderLines(slide, t)}</h2>
                                 )}
 
                                 <p className="hero-description rise" style={{ "--d": "650ms" }}>
-                                    {slide.description}
+                                    {t(slide.description)}
                                 </p>
 
                                 <Link
@@ -330,7 +332,7 @@ const HeroCarousel = () => {
                                     style={{ "--d": "800ms" }}
                                     tabIndex={active ? 0 : -1}
                                 >
-                                    {slide.cta}
+                                    {t(slide.cta)}
                                 </Link>
                             </div>
 
@@ -339,7 +341,7 @@ const HeroCarousel = () => {
                                     <img
                                         className="hero-image"
                                         src={slide.image}
-                                        alt={slide.alt}
+                                        alt={t(slide.alt)}
                                         style={{ objectPosition: slide.position }}
                                         fetchPriority={i === 0 ? "high" : "auto"}
                                         loading={i === 0 ? "eager" : "lazy"}
@@ -359,7 +361,7 @@ const HeroCarousel = () => {
                             type="button"
                             className={`hero-indicator${i === index ? " is-active" : ""}`}
                             onClick={() => setIndex(i)}
-                            aria-label={`Show slide ${i + 1}: ${slide.label}`}
+                            aria-label={`${t("Show slide")} ${i + 1}: ${t(slide.label)}`}
                             aria-current={i === index}
                         >
                             <span className="hero-indicator-track">
@@ -381,17 +383,17 @@ const HeroCarousel = () => {
                     <span className="hero-counter" aria-hidden="true">
                         {index + 1} / {total}
                     </span>
-                    <button type="button" onClick={goPrev} aria-label="Previous slide">
+                    <button type="button" onClick={goPrev} aria-label={t("Previous slide")}>
                         <FiChevronLeft aria-hidden="true" />
                     </button>
                     <button
                         type="button"
                         onClick={() => setPaused((p) => !p)}
-                        aria-label={paused ? "Play slideshow" : "Pause slideshow"}
+                        aria-label={t(paused ? "Play slideshow" : "Pause slideshow")}
                     >
                         {paused ? <FiPlay aria-hidden="true" /> : <FiPause aria-hidden="true" />}
                     </button>
-                    <button type="button" onClick={goNext} aria-label="Next slide">
+                    <button type="button" onClick={goNext} aria-label={t("Next slide")}>
                         <FiChevronRight aria-hidden="true" />
                     </button>
                 </div>
@@ -400,14 +402,14 @@ const HeroCarousel = () => {
     );
 };
 
-function renderLines(slide) {
+function renderLines(slide, t) {
     return slide.lines.map((line, n) => (
         <span className="line" key={line}>
             <span
                 className={slide.outlineLine === n ? "outline" : undefined}
                 style={{ "--i": n }}
             >
-                {line}
+                {t(line)}
             </span>
         </span>
     ));
@@ -417,30 +419,35 @@ function renderLines(slide) {
    Marquee
 ------------------------------------------------------------------ */
 
-const Marquee = () => (
-    <section className="marquee" aria-label="Store highlights">
-        <div className="marquee-track">
-            {[0, 1].map((copy) => (
-                <ul className="marquee-group" key={copy} aria-hidden={copy === 1}>
-                    {MARQUEE_ITEMS.map((item) => (
-                        <li key={item}>{item}</li>
-                    ))}
-                </ul>
-            ))}
-        </div>
-    </section>
-);
+const Marquee = () => {
+    const { t } = useSitePreferences();
+    return (
+        <section className="marquee" aria-label={t("Store highlights")}>
+            <div className="marquee-track">
+                {[0, 1].map((copy) => (
+                    <ul className="marquee-group" key={copy} aria-hidden={copy === 1}>
+                        {MARQUEE_ITEMS.map((item) => (
+                            <li key={item}>{t(item)}</li>
+                        ))}
+                    </ul>
+                ))}
+            </div>
+        </section>
+    );
+};
 
 /* ------------------------------------------------------------------
    Category banners
 ------------------------------------------------------------------ */
 
-const CategoryBanners = () => (
-    <section className="home-section" aria-labelledby="categories-title">
+const CategoryBanners = () => {
+    const { t } = useSitePreferences();
+    return (
+      <section className="home-section" aria-labelledby="categories-title">
         <div className="section-head">
-            <h2 id="categories-title" {...rv("left")}>Shop by category</h2>
+            <h2 id="categories-title" {...rv("left")}>{t("Shop by category")}</h2>
             <Link to="/products/" className="text-link" {...rv("right", 150)}>
-                View all products
+                {t("View all products")}
             </Link>
         </div>
 
@@ -463,23 +470,25 @@ const CategoryBanners = () => (
                             decoding="async"
                             style={{ objectPosition: imagePosition }}
                         />
-                        <span className="cat-watermark" aria-hidden="true">{name}</span>
+                        <span className="cat-watermark" aria-hidden="true">{t(name)}</span>
                         <span className="cat-copy">
-                            <strong>{name}</strong>
-                            <span>{note}</span>
+                            <strong>{t(name)}</strong>
+                            <span>{t(note)}</span>
                         </span>
                     </Link>
                 );
             })}
         </div>
-    </section>
-);
+      </section>
+    );
+};
 
 /* ------------------------------------------------------------------
    Product carousel (live data)
 ------------------------------------------------------------------ */
 
 const ProductCarousel = () => {
+    const { t } = useSitePreferences();
     const trackRef = useRef(null);
     const [products, setProducts] = useState([]);
     const [status, setStatus] = useState("loading");
@@ -513,18 +522,18 @@ const ProductCarousel = () => {
     return (
         <section className="home-section" aria-labelledby="products-title">
             <div className="section-head">
-                <h2 id="products-title" {...rv("left")}>New arrivals</h2>
+                <h2 id="products-title" {...rv("left")}>{t("New arrivals")}</h2>
                 <div className="rail-buttons" {...rv("right", 150)}>
-                    <button type="button" onClick={() => scrollTrack(-1)} aria-label="Scroll products left">
+                    <button type="button" onClick={() => scrollTrack(-1)} aria-label={t("Scroll products left")}>
                         <FiChevronLeft aria-hidden="true" />
                     </button>
-                    <button type="button" onClick={() => scrollTrack(1)} aria-label="Scroll products right">
+                    <button type="button" onClick={() => scrollTrack(1)} aria-label={t("Scroll products right")}>
                         <FiChevronRight aria-hidden="true" />
                     </button>
                 </div>
             </div>
 
-            <div className="product-track" ref={trackRef} tabIndex={0} aria-label="New arrivals list">
+            <div className="product-track" ref={trackRef} tabIndex={0} aria-label={t("New arrivals list")}>
                 {status === "loading"
                     ? Array.from({ length: 5 }, (_, n) => (
                         <div className="product-card is-skeleton" key={n} aria-hidden="true">
@@ -567,20 +576,21 @@ const ProductCarousel = () => {
    Editorial banner with animated stats
 ------------------------------------------------------------------ */
 
-const Editorial = () => (
-    <section className="editorial" aria-labelledby="editorial-title">
+const Editorial = () => {
+    const { t } = useSitePreferences();
+    return (
+      <section className="editorial" aria-labelledby="editorial-title">
         <div className="editorial-top">
             <h2 id="editorial-title" {...rv("left")}>
-                <span>Designed</span>
-                <span>to be</span>
-                <span className="outline">worn.</span>
+                <span>{t("Designed")}</span>
+                <span>{t("to be")}</span>
+                <span className="outline">{t("worn.")}</span>
             </h2>
             <div className="editorial-side" {...rv("right", 150)}>
                 <p>
-                    Every piece starts with fabric we would want to wear ourselves. Natural fibres, honest
-                    construction and cuts that stay in your wardrobe for years, not weeks.
+                    {t("Every piece starts with fabric we would want to wear ourselves. Natural fibres, honest construction and cuts that stay in your wardrobe for years, not weeks.")}
                 </p>
-                <Link to="/products/" className="hero-cta">Browse the collection</Link>
+                <Link to="/products/" className="hero-cta">{t("Browse the collection")}</Link>
             </div>
         </div>
 
@@ -588,18 +598,20 @@ const Editorial = () => (
             {STATS.map(({ end, suffix, label }, i) => (
                 <div key={label} {...rv(REVEAL_CYCLE[i % REVEAL_CYCLE.length], i * 120)}>
                     <dt><CountUp end={end} suffix={suffix} /></dt>
-                    <dd>{label}</dd>
+                    <dd>{t(label)}</dd>
                 </div>
             ))}
         </dl>
-    </section>
-);
+      </section>
+    );
+};
 
 /* ------------------------------------------------------------------
    Testimonials carousel
 ------------------------------------------------------------------ */
 
 const Testimonials = () => {
+    const { t } = useSitePreferences();
     const [index, setIndex] = useState(0);
     const [engaged, setEngaged] = useState(false);
 
@@ -614,7 +626,7 @@ const Testimonials = () => {
         <section
             className="testimonials"
             aria-roledescription="carousel"
-            aria-label="Customer reviews"
+            aria-label={t("Customer reviews")}
             onMouseEnter={() => setEngaged(true)}
             onMouseLeave={() => setEngaged(false)}
             onFocus={() => setEngaged(true)}
@@ -628,10 +640,10 @@ const Testimonials = () => {
                         className={`testimonial${i === index ? " is-active" : ""}`}
                         aria-hidden={i !== index}
                     >
-                        <blockquote>{item.quote}</blockquote>
+                        <blockquote>{t(item.quote)}</blockquote>
                         <figcaption>
                             <strong>{item.name}</strong>
-                            <span>{item.detail}</span>
+                            <span>{t(item.detail)}</span>
                         </figcaption>
                     </figure>
                 ))}
@@ -644,7 +656,7 @@ const Testimonials = () => {
                         type="button"
                         className={i === index ? "is-active" : undefined}
                         onClick={() => setIndex(i)}
-                        aria-label={`Show review from ${item.name}`}
+                        aria-label={`${t("Show review from")} ${item.name}`}
                         aria-current={i === index}
                     />
                 ))}
@@ -659,6 +671,7 @@ const Testimonials = () => {
 ------------------------------------------------------------------ */
 
 const Newsletter = () => {
+    const { t } = useSitePreferences();
     const [email, setEmail] = useState("");
     const [done, setDone] = useState(false);
 
@@ -671,27 +684,27 @@ const Newsletter = () => {
     return (
         <section className="newsletter" aria-labelledby="newsletter-title">
             <div className="newsletter-inner">
-                <h2 id="newsletter-title" {...rv("left")}>Get 10% off your first order</h2>
+                <h2 id="newsletter-title" {...rv("left")}>{t("Get 10% off your first order")}</h2>
                 <p {...rv("left", 120)}>
-                    Join the list for early access to new collections. One email a week, unsubscribe any time.
+                    {t("Join the list for early access to new collections. One email a week, unsubscribe any time.")}
                 </p>
 
                 {done ? (
                     <p className="newsletter-done" role="status" {...rv("bottom")}>
-                        Thanks. Check your inbox to confirm your email address.
+                        {t("Thanks. Check your inbox to confirm your email address.")}
                     </p>
                 ) : (
                     <form onSubmit={handleSubmit} {...rv("bottom", 240)}>
-                        <label className="visually-hidden" htmlFor="newsletter-email">Email address</label>
+                        <label className="visually-hidden" htmlFor="newsletter-email">{t("Email address")}</label>
                         <input
                             id="newsletter-email"
                             type="email"
                             required
                             value={email}
                             onChange={(event) => setEmail(event.target.value)}
-                            placeholder="you@example.com"
+                            placeholder={t("you@example.com")}
                         />
-                        <button type="submit">Sign me up</button>
+                        <button type="submit">{t("Sign me up")}</button>
                     </form>
                 )}
             </div>
@@ -705,6 +718,7 @@ const Newsletter = () => {
 
 const Home = () => {
     const rootRef = useRef(null);
+    const { t } = useSitePreferences();
 
     // Hidden start state only applies when the observer can actually run,
     // so content is never stuck invisible.
@@ -716,7 +730,7 @@ const Home = () => {
             <HeroCarousel />
             <Marquee />
 
-            <section className="benefits" aria-label="Store benefits">
+            <section className="benefits" aria-label={t("Store benefits")}>
                 <div className="benefits-inner">
                     {BENEFITS.map(({ title, description, Icon }, i) => (
                         <article
@@ -726,8 +740,8 @@ const Home = () => {
                         >
                             <Icon className="benefit-icon" aria-hidden="true" />
                             <div className="benefit-copy">
-                                <h2>{title}</h2>
-                                <p>{description}</p>
+                                <h2>{t(title)}</h2>
+                                <p>{t(description)}</p>
                             </div>
                         </article>
                     ))}

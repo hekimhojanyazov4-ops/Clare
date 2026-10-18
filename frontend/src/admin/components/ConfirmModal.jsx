@@ -1,4 +1,5 @@
 import { AlertTriangle, X } from "lucide-react";
+import { useSitePreferences } from "../../context/SitePreferencesContext";
 
 export default function ConfirmModal({
     open,
@@ -7,6 +8,8 @@ export default function ConfirmModal({
     onConfirm,
     onCancel,
 }) {
+    const { t } = useSitePreferences();
+
     if (!open) {
         return null;
     }
@@ -18,7 +21,9 @@ export default function ConfirmModal({
 
                 <button
                     className="modal-close"
+                    type="button"
                     onClick={onCancel}
+                    aria-label={t("Close dialog")}
                 >
                     <X size={18} />
                 </button>
@@ -37,14 +42,14 @@ export default function ConfirmModal({
                         className="cancel-btn"
                         onClick={onCancel}
                     >
-                        Cancel
+                        {t("Cancel")}
                     </button>
 
                     <button
                         className="danger-btn"
                         onClick={onConfirm}
                     >
-                        Delete
+                        {t("Delete")}
                     </button>
 
                 </div>

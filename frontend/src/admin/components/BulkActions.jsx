@@ -2,12 +2,15 @@ import {
     Trash2,
     X,
 } from "lucide-react";
+import { useSitePreferences } from "../../context/SitePreferencesContext";
 
 export default function BulkActions({
     selectedCount,
     onDelete,
     onClear,
 }) {
+    const { t } = useSitePreferences();
+
     if (selectedCount === 0) {
         return null;
     }
@@ -16,7 +19,7 @@ export default function BulkActions({
         <div className="bulk-actions">
 
             <span>
-                {selectedCount} selected
+                {selectedCount} {t("selected")}
             </span>
 
             <button
@@ -24,7 +27,7 @@ export default function BulkActions({
                 onClick={onClear}
             >
                 <X size={16} />
-                Clear
+                {t("Clear")}
             </button>
 
             <button
@@ -32,7 +35,7 @@ export default function BulkActions({
                 onClick={onDelete}
             >
                 <Trash2 size={16} />
-                Delete
+                {t("Delete")}
             </button>
 
         </div>

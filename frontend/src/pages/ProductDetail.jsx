@@ -1,10 +1,12 @@
 
-import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
 import "./ProductDetail.css";
 
 import {
     FiArrowLeft,
+    FiChevronLeft,
+    FiChevronRight,
     FiShoppingCart,
     FiHeart,
     FiPlus,
@@ -16,28 +18,81 @@ import {
     addToCart,
     getFavourites,
     getProduct,
+    getProducts,
     toggleFavourite,
 } from "../api";
-import { resolveProductImage } from "../utils/productImage";
+import {
+    resolveProductImage,
+    resolveProductImages,
+} from "../utils/productImage";
+import {
+    getRecentlyViewedProducts,
+    getRelatedProducts,
+} from "../utils/productRecommendations";
+import { recordRecentlyViewedProduct } from "../utils/recentlyViewed";
 import { useNotifications } from "../context/NotificationContext";
+import { useSitePreferences } from "../context/SitePreferencesContext";
+import ProductReviews from "../components/ProductReviews";
+
+const RECOMMENDATION_LIMIT = 4;
 
 const ProductDetail = () => {
     const { uuid } = useParams();
+    const navigate = useNavigate();
+    const location = useLocation();
+    const navigationDirection =
+        location.state?.productNavigationDirection ?? 0;
 
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isNavigating, setIsNavigating] = useState(false);
     const [error, setError] = useState("");
+    const [catalogProducts, setCatalogProducts] = useState([]);
+    const [catalogError, setCatalogError] = useState("");
+    const [catalogLoading, setCatalogLoading] = useState(true);
+    const [recentlyViewedIds, setRecentlyViewedIds] = useState([]);
+    const [historyError, setHistoryError] = useState("");
+    const [activeImageIndex, setActiveImageIndex] = useState(0);
 
     // Default quantity is 1, but the input remains editable.
     const [quantity, setQuantity] = useState("1");
     const [quantityError, setQuantityError] = useState("");
 
     const [isFavourite, setIsFavourite] = useState(false);
+    const [favoriteAnimationKey, setFavoriteAnimationKey] = useState(0);
     const [actionLoading, setActionLoading] = useState(false);
     const { error: showError, success: showSuccess } = useNotifications();
+    const { t } = useSitePreferences();
+    const productImageStageRef = useRef(null);
+    const previousFavorite = useRef(isFavourite);
+
+    useEffect(() => {
+        if (previousFavorite.current !== isFavourite) {
+            previousFavorite.current = isFavourite;
+            setFavoriteAnimationKey((key) => key + 1);
+        }
+    }, [isFavourite]);
 
     const productImage = resolveProductImage(product);
-    const currentPrice = product?.discount_price || product?.price;
+    const galleryImages = resolveProductImages(product);
+    const activeGalleryIndex = galleryImages.length
+        ? activeImageIndex % galleryImages.length
+        : 0;
+    const currentPrice = product?.discount_price ?? product?.price;
+    const relatedProducts = useMemo(
+        () => getRelatedProducts(catalogProducts, product, RECOMMENDATION_LIMIT),
+        [catalogProducts, product]
+    );
+    const recentlyViewedProducts = useMemo(
+        () =>
+            getRecentlyViewedProducts(
+                catalogProducts,
+                recentlyViewedIds,
+                product?.uuid,
+                RECOMMENDATION_LIMIT
+            ),
+        [catalogProducts, product?.uuid, recentlyViewedIds]
+    );
 
     const hasDiscount =
         product?.discount_price != null &&
@@ -54,16 +109,58 @@ const ProductDetail = () => {
         stock >= 0;
 
     const hasStock = validStock && stock > 0;
+    const currentProductIndex = catalogProducts.findIndex(
+        (item) => item?.uuid === product?.uuid
+    );
+    const previousProduct = catalogProducts[currentProductIndex - 1];
+    const nextProduct = catalogProducts[currentProductIndex + 1];
+
+    function navigateToProduct(targetProduct, direction) {
+        if (!targetProduct?.uuid || catalogLoading || isNavigating) return;
+
+        setIsNavigating(true);
+        navigate(`/products/${targetProduct.uuid}/`, {
+            state: { productNavigationDirection: direction },
+        });
+    }
+
+    function handleProductImagePointerMove(event) {
+        if (event.pointerType !== "mouse" || !productImageStageRef.current) return;
+
+        const bounds = event.currentTarget.getBoundingClientRect();
+        if (!bounds.width || !bounds.height) return;
+
+        const horizontalPosition =
+            (event.clientX - bounds.left) / bounds.width - 0.5;
+        const verticalPosition =
+            (event.clientY - bounds.top) / bounds.height - 0.5;
+
+        productImageStageRef.current.style.setProperty(
+            "--product-tilt-x",
+            `${horizontalPosition * 12}deg`
+        );
+        productImageStageRef.current.style.setProperty(
+            "--product-tilt-y",
+            `${verticalPosition * -12}deg`
+        );
+    }
+
+    function resetProductImageTilt() {
+        productImageStageRef.current?.style.setProperty("--product-tilt-x", "0deg");
+        productImageStageRef.current?.style.setProperty("--product-tilt-y", "0deg");
+    }
 
     useEffect(() => {
         let cancelled = false;
 
         async function loadProduct() {
             setLoading(true);
+            setIsNavigating(false);
             setError("");
             setProduct(null);
             setQuantity("1");
             setQuantityError("");
+            setActiveImageIndex(0);
 
             try {
                 const data = await getProduct(uuid);
@@ -90,6 +187,59 @@ const ProductDetail = () => {
             cancelled = true;
         };
     }, [uuid]);
+
+    useEffect(() => {
+        let cancelled = false;
+
+        async function loadCatalog() {
+            setCatalogLoading(true);
+            setCatalogError("");
+
+            try {
+                const data = await getProducts();
+                if (!Array.isArray(data)) {
+                    throw new Error("Product recommendations are unavailable.");
+                }
+
+                if (!cancelled) {
+                    setCatalogProducts(data);
+                }
+            } catch (catalogLoadError) {
+                if (!cancelled) {
+                    setCatalogError(
+                        catalogLoadError?.message ||
+                            "Unable to load product recommendations."
+                    );
+                }
+            } finally {
+                if (!cancelled) {
+                    setCatalogLoading(false);
+                }
+            }
+        }
+
+        loadCatalog();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!product?.uuid) return;
+
+        setHistoryError("");
+
+        try {
+            setRecentlyViewedIds(recordRecentlyViewedProduct(product.uuid));
+        } catch (storageError) {
+            setRecentlyViewedIds([]);
+            setHistoryError(
+                storageError?.message ||
+                    "Recently viewed items could not be saved."
+            );
+        }
+    }, [product?.uuid]);
 
     useEffect(() => {
         let cancelled = false;
@@ -256,12 +406,12 @@ const ProductDetail = () => {
     if (error || !product) {
         return (
             <div className="error-message">
-                <h2>Product not found</h2>
-                <p>{error || "This product could not be found."}</p>
+                <h2>{t("Product not found")}</h2>
+                <p>{error || t("This product could not be found.")}</p>
 
                 <Link to="/products/" className="detail-back-link">
                     <FiArrowLeft />
-                    Back to Products
+                    {t("Back to Products")}
                 </Link>
             </div>
         );
@@ -271,49 +421,166 @@ const ProductDetail = () => {
         <section className="product-detail-page">
             <Link to="/products/" className="detail-back-link">
                 <FiArrowLeft />
-                Back to Products
+                {t("Back to Products")}
             </Link>
 
-            <div className="product-detail-layout">
-                <div className="product-detail-image">
-                    {productImage ? (
-                        <img src={productImage} alt={product.name} />
-                    ) : (
-                        <div className="product-detail-image-placeholder">
-                            <FiShoppingCart size={60} />
+            <div className="product-navigation-frame">
+                <button
+                    type="button"
+                    className="product-navigation-button previous"
+                    aria-label={t("Previous product")}
+                    title={t("Previous product")}
+                    disabled={catalogLoading || isNavigating || !previousProduct}
+                    onClick={() => navigateToProduct(previousProduct, -1)}
+                >
+                    <FiChevronLeft aria-hidden="true" />
+                </button>
+
+                <div
+                    key={product.uuid}
+                    className="product-detail-layout"
+                    data-navigation-direction={navigationDirection}
+                >
+                <div
+                    className={`product-detail-gallery${
+                        galleryImages.length > 1 ? " has-thumbnails" : ""
+                    }`}
+                >
+                    {galleryImages.length > 1 && (
+                        <div
+                            className="product-gallery-thumbnails"
+                            role="group"
+                            aria-label={t("Product images")}
+                        >
+                            {galleryImages.map((image, index) => (
+                                <button
+                                    key={image}
+                                    type="button"
+                                    className={`product-gallery-thumbnail${
+                                        index === activeGalleryIndex ? " active" : ""
+                                    }`}
+                                    aria-label={`Show product image ${index + 1}`}
+                                    aria-pressed={index === activeGalleryIndex}
+                                    onClick={() => setActiveImageIndex(index)}
+                                >
+                                    <img src={image} alt="" />
+                                </button>
+                            ))}
                         </div>
                     )}
+
+                    <div
+                        className="product-detail-image"
+                        ref={productImageStageRef}
+                        onPointerMove={handleProductImagePointerMove}
+                        onPointerLeave={resetProductImageTilt}
+                    >
+                        {galleryImages.length ? (
+                            <img
+                                key={`${product.uuid}-${activeGalleryIndex}`}
+                                className="product-detail-main-image"
+                                src={galleryImages[activeGalleryIndex]}
+                                alt={`${product.name} image ${activeGalleryIndex + 1}`}
+                            />
+                        ) : productImage ? (
+                            <img
+                                className="product-detail-main-image"
+                                src={productImage}
+                                alt={product.name}
+                            />
+                        ) : (
+                            <div className="product-detail-image-placeholder">
+                                <FiShoppingCart size={60} />
+                            </div>
+                        )}
+
+                        {galleryImages.length > 1 && (
+                            <>
+                                <button
+                                    type="button"
+                                    className="product-gallery-arrow previous"
+                                    aria-label={t("Show previous product image")}
+                                    onClick={() =>
+                                        setActiveImageIndex(
+                                            (activeGalleryIndex - 1 + galleryImages.length) %
+                                                galleryImages.length
+                                        )
+                                    }
+                                >
+                                    <FiChevronLeft />
+                                </button>
+                                <button
+                                    type="button"
+                                    className="product-gallery-arrow next"
+                                    aria-label={t("Show next product image")}
+                                    onClick={() =>
+                                        setActiveImageIndex(
+                                            (activeGalleryIndex + 1) %
+                                                galleryImages.length
+                                        )
+                                    }
+                                >
+                                    <FiChevronRight />
+                                </button>
+                                <span className="product-gallery-count" aria-live="polite">
+                                    {activeGalleryIndex + 1} / {galleryImages.length}
+                                </span>
+                            </>
+                        )}
+                        {hasDiscount && (
+                            <span className="product-detail-discount">
+                                {Math.round(
+                                    (1 - Number(product.discount_price) / Number(product.price)) *
+                                        100
+                                )}
+                                % OFF
+                            </span>
+                        )}
+                    </div>
                 </div>
 
                 <div className="product-detail-info">
+                    <div className="product-detail-meta">
+                        <span>{product.category?.name || t("PRODUCT DETAILS")}</span>
+                        <span>{t("PRODUCT CODE")}: {String(product.uuid).slice(0, 8).toUpperCase()}</span>
+                    </div>
                     <h1>{product.name}</h1>
 
-                    <h2>
-                        ${Number(currentPrice).toFixed(2)}
+                    <div className="product-detail-price">
+                        <h2>${Number(currentPrice).toFixed(2)}</h2>
 
                         {hasDiscount && (
                             <del className="detail-old-price">
                                 ${Number(product.price).toFixed(2)}
                             </del>
                         )}
-                    </h2>
+                        {hasDiscount && (
+                            <span className="product-detail-savings">
+                                {t("SAVE")}{" "}
+                                {Math.round(
+                                    (1 - Number(product.discount_price) / Number(product.price)) *
+                                        100
+                                )}
+                                %
+                            </span>
+                        )}
+                    </div>
 
                     <p className="product-detail-description">
                         {product.description ||
-                            "No description available."}
+                            t("No description available.")}
                     </p>
 
                     <div className="product-stock-status">
                         {hasStock ? (
                             <span className="stock-available">
-                                In stock: {stock} item
-                                {stock === 1 ? "" : "s"}
+                                {t("In stock")}: {stock} {t(stock === 1 ? "item" : "items")}
                             </span>
                         ) : (
                             <span className="stock-unavailable">
                                 {!validStock
-                                    ? "Stock information unavailable"
-                                    : "Out of stock"}
+                                    ? t("Stock information unavailable")
+                                    : t("Out of stock")}
                             </span>
                         )}
                     </div>
@@ -321,14 +588,14 @@ const ProductDetail = () => {
                     <div className="detail-actions">
                         <div className="detail-quantity">
                             <label htmlFor="product-quantity">
-                                Quantity
+                                {t("Quantity")}
                             </label>
 
                             <div className="quantity-control">
                                 <button
                                     type="button"
                                     className="quantity-btn"
-                                    aria-label="Decrease quantity"
+                                    aria-label={t("Decrease quantity")}
                                     onClick={decreaseQuantity}
                                     disabled={
                                         !hasStock ||
@@ -368,7 +635,7 @@ const ProductDetail = () => {
                                 <button
                                     type="button"
                                     className="quantity-btn"
-                                    aria-label="Increase quantity"
+                                    aria-label={t("Increase quantity")}
                                     onClick={increaseQuantity}
                                     disabled={
                                         !hasStock ||
@@ -386,7 +653,7 @@ const ProductDetail = () => {
                                 id="quantity-help"
                                 className="quantity-help"
                             >
-                                Min. 1 · Max. {validStock ? stock : 0}
+                                {t("Min. 1 · Max.")} {validStock ? stock : 0}
                             </span>
 
                             {quantityError && (
@@ -408,33 +675,184 @@ const ProductDetail = () => {
                         >
                             <FiShoppingCart />
                             {actionLoading
-                                ? "Working..."
-                                : "Add to Cart"}
+                                ? t("Working...")
+                                : t("Add to Cart")}
                         </button>
 
                         <button
                             className={`detail-favorite-btn ${
                                 isFavourite ? "active" : ""
-                            }`}
+                            }${favoriteAnimationKey ? " has-favorite-animation" : ""}`}
                             type="button"
                             aria-label={
                                 isFavourite
-                                    ? "Remove from favourites"
-                                    : "Add to favourites"
+                                    ? t("Remove from favourites")
+                                    : t("Add to favourites")
                             }
                             aria-pressed={isFavourite}
                             onClick={handleToggleFavourite}
                             disabled={actionLoading}
                         >
                             <FiHeart
+                                key={favoriteAnimationKey}
                                 fill={isFavourite ? "currentColor" : "none"}
                             />
                         </button>
                     </div>
                 </div>
             </div>
+
+                <button
+                    type="button"
+                    className="product-navigation-button next"
+                    aria-label={t("Next product")}
+                    title={t("Next product")}
+                    disabled={catalogLoading || isNavigating || !nextProduct}
+                    onClick={() => navigateToProduct(nextProduct, 1)}
+                >
+                    <FiChevronRight aria-hidden="true" />
+                </button>
+            </div>
+
+            <ProductShelf
+                id="all-products"
+                className="product-suggestions-mini"
+                eyebrow={t("BROWSE THE COLLECTION")}
+                title={t("All products")}
+                products={catalogProducts}
+                loading={catalogLoading}
+                error={catalogError}
+                loadingMessage={t("Loading all products...")}
+                emptyMessage={t("No products are available right now.")}
+            />
+
+            <ProductShelf
+                id="related-products"
+                eyebrow={t("MORE TO EXPLORE")}
+                title={t("Related products")}
+                products={relatedProducts}
+                loading={catalogLoading}
+                error={catalogError}
+                emptyMessage={t("No related products are available right now.")}
+            />
+
+            <ProductShelf
+                id="recently-viewed"
+                eyebrow={t("YOUR BROWSING HISTORY")}
+                title={t("Recently viewed")}
+                products={recentlyViewedProducts}
+                loading={catalogLoading}
+                error={historyError}
+                loadingMessage={t("Loading recently viewed products...")}
+                emptyMessage={t("Products you view will appear here.")}
+            />
+
+            <ProductReviews productUuid={product.uuid} />
         </section>
     );
 };
+
+function ProductShelf({
+    id,
+    className = "",
+    eyebrow,
+    title,
+    products,
+    loading,
+    error,
+    loadingMessage = "Loading recommendations...",
+    emptyMessage,
+}) {
+    const trackRef = useRef(null);
+
+    function scrollTrack(direction) {
+        const track = trackRef.current;
+        if (!track) return;
+
+        track.scrollBy({
+            left: direction * Math.max(track.clientWidth * 0.8, 220),
+            behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+                ? "instant"
+                : "smooth",
+        });
+    }
+
+    return (
+        <section
+            id={id}
+            className={`product-suggestions ${className}`.trim()}
+            aria-labelledby={`${id}-heading`}
+        >
+            <div className="product-suggestions-heading">
+                <div>
+                    <span>{eyebrow}</span>
+                    <h2 id={`${id}-heading`}>{title}</h2>
+                </div>
+                {products.length > 1 && (
+                    <div className="product-suggestions-controls">
+                        <button
+                            type="button"
+                            aria-label={`Scroll ${title.toLowerCase()} left`}
+                            onClick={() => scrollTrack(-1)}
+                        >
+                            <FiChevronLeft />
+                        </button>
+                        <button
+                            type="button"
+                            aria-label={`Scroll ${title.toLowerCase()} right`}
+                            onClick={() => scrollTrack(1)}
+                        >
+                            <FiChevronRight />
+                        </button>
+                    </div>
+                )}
+            </div>
+            {error ? (
+                <p className="product-suggestions-message" role="status">{error}</p>
+            ) : loading ? (
+                <p className="product-suggestions-message">{loadingMessage}</p>
+            ) : products.length ? (
+                <div
+                    className="product-suggestions-track"
+                    ref={trackRef}
+                    role="group"
+                    tabIndex={0}
+                    aria-label={title}
+                >
+                    {products.map((item) => (
+                        <RecommendationCard key={item.uuid} product={item} />
+                    ))}
+                </div>
+            ) : (
+                <p className="product-suggestions-message">{emptyMessage}</p>
+            )}
+        </section>
+    );
+}
+
+function RecommendationCard({ product }) {
+    const image = resolveProductImage(product);
+    const price = product.discount_price || product.price;
+
+    return (
+        <Link
+            to={`/products/${product.uuid}/`}
+            className="product-recommendation-card"
+        >
+            <div className="product-recommendation-image">
+                {image ? (
+                    <img src={image} alt={product.name} loading="lazy" />
+                ) : (
+                    <FiShoppingCart size={32} aria-hidden="true" />
+                )}
+            </div>
+            <div className="product-recommendation-info">
+                <span>{product.category?.name || "Shop the collection"}</span>
+                <h3>{product.name}</h3>
+                <strong>${Number(price).toFixed(2)}</strong>
+            </div>
+        </Link>
+    );
+}
 
 export default ProductDetail;

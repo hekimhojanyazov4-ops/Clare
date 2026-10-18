@@ -1,5 +1,11 @@
+
 import { Link } from "react-router-dom";
-import { FiArrowUpRight, FiHeart, FiShoppingBag } from "react-icons/fi";
+import {
+    FiArrowUpRight,
+    FiHeart,
+    FiShoppingBag,
+} from "react-icons/fi";
+import { useSitePreferences } from "../context/SitePreferencesContext";
 import "./Footer.css";
 
 const LINK_GROUPS = [
@@ -21,48 +27,83 @@ const LINK_GROUPS = [
     },
 ];
 
-const Footer = () => (
-    <footer className="site-footer">
-        <div className="footer-inner">
-            <div className="footer-top">
-                <div className="footer-brand-col">
-                    <Link to="/home/" className="footer-brand" aria-label="Clare home">
-                        <FiShoppingBag aria-hidden="true" />
-                        <span>CLARE</span>
-                    </Link>
-                    <p className="footer-tagline">
-                        Considered fashion pieces to bring a little more character
-                        to your everyday wardrobe.
-                    </p>
+const Footer = () => {
+    const { t } = useSitePreferences();
+    const currentYear = new Date().getFullYear();
+
+    return (
+        <footer className="site-footer" id="site-footer">
+            <div className="footer-inner">
+                <div className="footer-top">
+                    <div className="footer-brand-col">
+                        <Link
+                            to="/home/"
+                            className="footer-brand"
+                            aria-label={t("Clare home")}
+                        >
+                            <FiShoppingBag
+                                className="footer-brand-icon"
+                                aria-hidden="true"
+                            />
+                            <span>CLARE</span>
+                        </Link>
+
+                        <p className="footer-tagline">
+                            {t(
+                                "Considered fashion pieces to bring a little more character to your everyday wardrobe."
+                            )}
+                        </p>
+                    </div>
+
+                    <nav
+                        className="footer-links"
+                        aria-label={t("Footer navigation")}
+                    >
+                        {LINK_GROUPS.map((group) => (
+                            <div
+                                className="footer-link-col"
+                                key={group.title}
+                            >
+                                <h2>{t(group.title)}</h2>
+
+                                <ul>
+                                    {group.links.map((link) => (
+                                        <li key={link.to}>
+                                            <Link to={link.to}>
+                                                {t(link.label)}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </nav>
                 </div>
 
-                <nav className="footer-links" aria-label="Footer navigation">
-                    {LINK_GROUPS.map((group) => (
-                        <div className="footer-link-col" key={group.title}>
-                            <h2>{group.title}</h2>
-                            <ul>
-                                {group.links.map((link) => (
-                                    <li key={link.to}>
-                                        <Link to={link.to}>{link.label}</Link>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                </nav>
-            </div>
+                <div className="footer-bottom">
+                    <small className="footer-copy">
+                        <FiHeart
+                            aria-hidden="true"
+                            className="footer-heart"
+                        />
 
-            <div className="footer-bottom">
-                <small className="footer-copy">
-                    <FiHeart aria-hidden="true" className="footer-heart" />
-                    {new Date().getFullYear()} Clare. All rights reserved.
-                </small>
-                <Link className="footer-top-link" to="/home/#top">
-                    Back to top <FiArrowUpRight aria-hidden="true" />
-                </Link>
+                        <span>
+                            &copy; {currentYear} Clare.{" "}
+                            {t("All rights reserved.")}
+                        </span>
+                    </small>
+
+                    <Link
+                        className="footer-top-link"
+                        to="/home/#top"
+                    >
+                        {t("Back to top")}
+                        <FiArrowUpRight aria-hidden="true" />
+                    </Link>
+                </div>
             </div>
-        </div>
-    </footer>
-);
+        </footer>
+    );
+};
 
 export default Footer;

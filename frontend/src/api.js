@@ -35,6 +35,7 @@ const apiRequest = async (endpoint, options = {}) => {
     const response = await fetch(
         `${API_URL}/${String(endpoint).replace(/^\/+/, "")}`,
         {
+            ...options,
             headers: {
                 "Content-Type": "application/json",
                 ...(accessToken
@@ -42,7 +43,6 @@ const apiRequest = async (endpoint, options = {}) => {
                     : {}),
                 ...options.headers,
             },
-            ...options,
         }
     );
 
@@ -93,6 +93,47 @@ export const getProduct = (uuid) => {
     return apiRequest(`products/${uuid}/`);
 };
 
+export const getProductReviews = async (productUuid) => {
+    const data = await apiRequest(
+        `/reviews/?product_uuid=${encodeURIComponent(productUuid)}`
+    );
+    return data?.results ?? data;
+};
+
+export const createProductReview = (productUuid, review) =>
+    apiRequest("/reviews/", {
+        method: "POST",
+        body: JSON.stringify({ product_uuid: productUuid, ...review }),
+    });
+
+export const updateProductReview = (reviewUuid, review) =>
+    apiRequest(`reviews/${reviewUuid}/`, {
+        method: "PATCH",
+        body: JSON.stringify(review),
+    });
+
+export const getInboxConversations = async () => {
+    const data = await apiRequest("/inbox/");
+    return data?.results ?? data;
+};
+
+export const createInboxConversation = (subject, message) =>
+    apiRequest("/inbox/", {
+        method: "POST",
+        body: JSON.stringify({ subject, message }),
+    });
+
+export const replyToInboxConversation = (conversationUuid, body) =>
+    apiRequest(`inbox/${conversationUuid}/reply/`, {
+        method: "POST",
+        body: JSON.stringify({ body }),
+    });
+
+export const markInboxConversationRead = (conversationUuid) =>
+    apiRequest(`inbox/${conversationUuid}/mark_read/`, {
+        method: "PATCH",
+    });
+
 
 export const getCategories = () => {
     return apiRequest("/categories/").then((data) => data?.results ?? data);
@@ -108,14 +149,20 @@ export const getPayments = async () => {
     return data.results ?? data;
 };
 
-export const createOrderFromCart = () => apiRequest("/orders/create_from_cart/", {
+export const startCheckout = (idempotencyKey) => apiRequest("/orders/checkout/", {
     method: "POST",
+    headers: { "Idempotency-Key": idempotencyKey },
+    body: JSON.stringify({}),
 });
 
-export const createPayment = (amount, orderUuid) => apiRequest("/payments/", {
+export const cancelCheckout = (orderUuid) => apiRequest("/orders/cancel_checkout/", {
     method: "POST",
-    body: JSON.stringify({ amount, ...(orderUuid ? { order_uuid: orderUuid } : {}) }),
+    body: JSON.stringify({ order_uuid: orderUuid }),
 });
+
+export const getCheckoutStatus = (sessionId) => apiRequest(
+    `/orders/checkout_status/?session_id=${encodeURIComponent(sessionId)}`
+);
 
 const readLocalList = (key) => {
     try {

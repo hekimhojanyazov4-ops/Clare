@@ -742,6 +742,92 @@
     transform: translateY(-8px);
 }
 
+html[data-theme="dark"] .home-page {
+    background: #0f1215;
+    color: #edf3f7;
+}
+
+html[data-theme="dark"] .home-page .hero-carousel,
+html[data-theme="dark"] .home-page .hero-slide[data-theme="dark"],
+html[data-theme="dark"] .home-page .hero-slide[data-theme="blush"],
+html[data-theme="dark"] .home-page .hero-slide[data-theme="cream"] {
+    background: #111417;
+    color: #edf3f7;
+}
+
+html[data-theme="dark"] .home-page .hero-description,
+html[data-theme="dark"] .home-page .benefit-copy p,
+html[data-theme="dark"] .home-page .section-head .text-link,
+html[data-theme="dark"] .home-page .product-card p s {
+    color: #b0bac3;
+}
+
+html[data-theme="dark"] .home-page .hero-label,
+html[data-theme="dark"] .home-page .benefit-icon,
+html[data-theme="dark"] .home-page .section-head .text-link::after,
+html[data-theme="dark"] .home-page .product-badge {
+    color: #ffbf62;
+}
+
+html[data-theme="dark"] .home-page .benefits,
+html[data-theme="dark"] .home-page .benefit-item,
+html[data-theme="dark"] .home-page .section-head h2,
+html[data-theme="dark"] .home-page .product-card,
+html[data-theme="dark"] .home-page .product-thumb,
+html[data-theme="dark"] .home-page .product-card h3,
+html[data-theme="dark"] .home-page .product-card p strong,
+html[data-theme="dark"] .home-page .product-card p {
+    color: #edf3f7;
+}
+
+html[data-theme="dark"] .home-page .benefits {
+    background: #111417;
+}
+
+html[data-theme="dark"] .home-page .benefit-item + .benefit-item {
+    border-left-color: rgba(255, 255, 255, 0.09);
+}
+
+html[data-theme="dark"] .home-page .benefit-copy h2,
+html[data-theme="dark"] .home-page .section-head h2,
+html[data-theme="dark"] .home-page .product-card h3,
+html[data-theme="dark"] .home-page .product-card p strong,
+html[data-theme="dark"] .home-page .product-card p {
+    color: #f7fafc;
+}
+
+html[data-theme="dark"] .home-page .product-card {
+    border-color: #2b3137;
+    background: #171c20;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .home-page .product-thumb {
+    background: #1d2328;
+}
+
+html[data-theme="dark"] .home-page .product-card p {
+    border-top-color: rgba(255, 255, 255, 0.09);
+}
+
+html[data-theme="dark"] .home-page .hero-controls,
+html[data-theme="dark"] .home-page .rail-buttons,
+html[data-theme="dark"] .home-page .hero-buttons button,
+html[data-theme="dark"] .home-page .rail-buttons button {
+    color: #edf3f7;
+}
+
+html[data-theme="dark"] .home-page .hero-buttons button,
+html[data-theme="dark"] .home-page .rail-buttons button {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .home-page .hero-buttons button:hover,
+html[data-theme="dark"] .home-page .rail-buttons button:hover {
+    background: #edf3f7;
+    color: #111417;
+}
+
 /* ---------- Skeleton ---------- */
 
 .home-page .product-card.is-skeleton {

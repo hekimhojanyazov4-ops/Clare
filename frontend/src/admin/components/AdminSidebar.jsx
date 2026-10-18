@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { NavLink } from "react-router-dom";
+import { useSitePreferences } from "../../context/SitePreferencesContext";
 
 const links = [
     {
@@ -50,6 +51,7 @@ const links = [
 ];
 
 export default function AdminSidebar({ open, onClose, onLogout }) {
+    const { t } = useSitePreferences();
 
     return (
         <aside className={`admin-sidebar ${open ? "open" : ""}`}>
@@ -62,7 +64,7 @@ export default function AdminSidebar({ open, onClose, onLogout }) {
 
                 <div>
                     <strong>Clare</strong>
-                    <span>Administration</span>
+                    <span>{t("Administration")}</span>
                 </div>
 
             </div>
@@ -70,7 +72,7 @@ export default function AdminSidebar({ open, onClose, onLogout }) {
             <nav className="admin-sidebar-nav">
 
                 <p className="sidebar-label">
-                    MANAGEMENT
+                    {t("MANAGEMENT")}
                 </p>
 
                 {links.map(link => {
@@ -97,7 +99,7 @@ export default function AdminSidebar({ open, onClose, onLogout }) {
                             <Icon size={19} />
 
                             <span>
-                                {link.label}
+                                {t(link.label)}
                             </span>
                         </NavLink>
                     );
@@ -110,7 +112,7 @@ export default function AdminSidebar({ open, onClose, onLogout }) {
 
                 <button type="button" onClick={onLogout}>
                     <LogOut size={18} />
-                    Logout
+                    {t("Logout")}
                 </button>
 
             </div>

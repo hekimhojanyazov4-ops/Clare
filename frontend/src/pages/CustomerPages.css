@@ -110,3 +110,183 @@
     font-weight: 700;
     text-decoration: none;
 }
+
+html[data-theme="dark"] .customer-page {
+    color: #edf3f7;
+}
+
+html[data-theme="dark"] .customer-page-heading > span {
+    color: #ffbf62;
+}
+
+html[data-theme="dark"] .customer-page-heading h1,
+html[data-theme="dark"] .customer-empty-state h2 {
+    color: #f3f6f8;
+}
+
+html[data-theme="dark"] .customer-page-heading p,
+html[data-theme="dark"] .customer-empty-state p {
+    color: #b0bac3;
+}
+
+html[data-theme="dark"] .customer-empty-state {
+    border-color: #30373d;
+    background: #171c20;
+    color: #edf3f7;
+}
+
+html[data-theme="dark"] .customer-empty-state > svg {
+    color: #ffb629;
+}
+
+html[data-theme="dark"] .customer-empty-state a {
+    background: #ffb629;
+    color: #171717;
+}
+
+html[data-theme="dark"] .customer-empty-state a:hover {
+    background: #f4a914;
+}
+
+.customer-order-list {
+    display: grid;
+    gap: 14px;
+}
+
+.customer-order-card {
+    overflow: hidden;
+    border: 1px solid #e5e8eb;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.customer-order-card > header,
+.customer-order-card > footer,
+.customer-order-card li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.customer-order-card > header,
+.customer-order-card > footer {
+    padding: 15px 18px;
+    background: #f7f8f9;
+}
+
+.customer-order-card > header > div {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.customer-order-card > header > div > span,
+.customer-order-card time {
+    color: #77818c;
+    font-size: 12px;
+}
+
+.customer-order-card > header strong {
+    overflow-wrap: anywhere;
+    font-size: 12px;
+}
+
+.customer-order-status {
+    flex: 0 0 auto;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #fff0c4;
+    color: #735000;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.customer-order-status.is-confirmed {
+    background: #e6f5eb;
+    color: #247542;
+}
+
+.customer-order-status.is-cancelled {
+    background: #fff0ef;
+    color: #a12d24;
+}
+
+.customer-order-card ul {
+    display: grid;
+    gap: 10px;
+    margin: 0;
+    padding: 18px;
+    list-style: none;
+}
+
+.customer-order-card li {
+    color: #303841;
+    font-size: 13px;
+}
+
+.customer-order-card > footer {
+    border-top: 1px solid #e9ecef;
+}
+
+.customer-order-card > footer > strong {
+    font-size: 18px;
+}
+
+.customer-orders-error {
+    color: #a12d24;
+}
+
+html[data-theme="dark"] .customer-order-card {
+    border-color: #30373d;
+    background: #171c20;
+}
+
+html[data-theme="dark"] .customer-order-card > header,
+html[data-theme="dark"] .customer-order-card > footer {
+    background: #1c2227;
+}
+
+html[data-theme="dark"] .customer-order-card li,
+html[data-theme="dark"] .customer-order-card > footer > strong {
+    color: #edf3f7;
+}
+
+html[data-theme="dark"] .customer-order-card > header > div > span,
+html[data-theme="dark"] .customer-order-card time {
+    color: #aab4bd;
+}
+
+html[data-theme="dark"] .customer-order-card > footer {
+    border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .customer-order-status {
+    background: rgba(255, 191, 98, 0.16);
+    color: #ffcf7a;
+}
+
+html[data-theme="dark"] .customer-order-status.is-confirmed {
+    background: rgba(64, 170, 104, 0.17);
+    color: #8dd7a1;
+}
+
+html[data-theme="dark"] .customer-order-status.is-cancelled {
+    background: rgba(180, 35, 24, 0.18);
+    color: #ffb4a8;
+}
+
+html[data-theme="dark"] .customer-orders-error {
+    color: #ffb4a8;
+}
+
+@media (max-width: 520px) {
+    .customer-order-card > header,
+    .customer-order-card > footer {
+        align-items: flex-start;
+    }
+
+    .customer-order-card > footer {
+        flex-direction: column;
+    }
+}

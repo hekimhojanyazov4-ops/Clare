@@ -51,7 +51,8 @@
 }
 
 .shop-list-button,
-.shop-list-summary button {
+.shop-list-summary button,
+.shop-list-checkout {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -64,6 +65,7 @@
     color: #ffffff;
     font-size: 12px;
     font-weight: 800;
+    text-decoration: none;
 }
 
 .shop-list-layout {
@@ -223,6 +225,11 @@
     opacity: 0.6;
 }
 
+.shop-list-checkout {
+    margin-top: 4px;
+    cursor: pointer;
+}
+
 .shop-list-error {
     padding: 18px;
     border-radius: 10px;
@@ -261,6 +268,100 @@
     right: 12px;
     background: rgba(255, 255, 255, 0.92);
     color: #d43f61;
+}
+
+html[data-theme="dark"] .shop-list-page {
+    background: #111416;
+    color: #eef3f5;
+}
+
+html[data-theme="dark"] .shop-list-kicker,
+html[data-theme="dark"] .shop-list-item-info > span,
+html[data-theme="dark"] .favourite-list-card > div > span {
+    color: #ffb14a;
+}
+
+html[data-theme="dark"] .shop-list-heading h1,
+html[data-theme="dark"] .shop-list-empty h2,
+html[data-theme="dark"] .shop-list-item-info h2,
+html[data-theme="dark"] .favourite-list-card h2,
+html[data-theme="dark"] .shop-list-summary strong {
+    color: #f5f7f8;
+}
+
+html[data-theme="dark"] .shop-list-heading p,
+html[data-theme="dark"] .shop-list-empty p,
+html[data-theme="dark"] .quantity-hint,
+html[data-theme="dark"] .shop-list-summary span {
+    color: #a7afb8;
+}
+
+html[data-theme="dark"] .shop-list-empty,
+html[data-theme="dark"] .shop-list-items,
+html[data-theme="dark"] .shop-list-summary,
+html[data-theme="dark"] .favourite-list-card {
+    border-color: #2a3036;
+    background: #171c20;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+}
+
+html[data-theme="dark"] .shop-list-item {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .shop-list-thumb,
+html[data-theme="dark"] .favourite-list-image {
+    background: #1d2227;
+}
+
+html[data-theme="dark"] .quantity-control button,
+html[data-theme="dark"] .shop-list-remove,
+html[data-theme="dark"] .favourite-list-card > button,
+html[data-theme="dark"] .quantity-control,
+html[data-theme="dark"] .quantity-input {
+    border-color: #353d44;
+    background: #101418;
+    color: #edf2f4;
+}
+
+html[data-theme="dark"] .quantity-input {
+    background: #0f1418;
+}
+
+html[data-theme="dark"] .quantity-control button:hover,
+html[data-theme="dark"] .shop-list-remove:hover,
+html[data-theme="dark"] .favourite-list-card > button:hover {
+    border-color: #fbbf68;
+    background: rgba(255, 181, 70, 0.08);
+    color: #ffbf62;
+}
+
+html[data-theme="dark"] .shop-list-button,
+html[data-theme="dark"] .shop-list-summary button,
+html[data-theme="dark"] .shop-list-checkout {
+    background: #ffb629;
+    color: #171717;
+}
+
+html[data-theme="dark"] .shop-list-button:hover,
+html[data-theme="dark"] .shop-list-summary button:not(:disabled):hover,
+html[data-theme="dark"] .shop-list-checkout:hover {
+    background: #f4a914;
+}
+
+html[data-theme="dark"] .shop-list-summary strong,
+html[data-theme="dark"] .shop-list-summary span,
+html[data-theme="dark"] .shop-list-summary button {
+    color: #171717;
+}
+
+html[data-theme="dark"] .shop-list-checkout {
+    color: #171717;
+}
+
+html[data-theme="dark"] .shop-list-error {
+    background: rgba(180, 35, 24, 0.2);
+    color: #ffb4a8;
 }
 
 @keyframes shop-list-in {
@@ -322,7 +423,8 @@
     }
 
     .shop-list-button,
-    .shop-list-summary button {
+    .shop-list-summary button,
+    .shop-list-checkout {
         border-radius: 3px;
         background: #ffb629;
         color: #171717;
@@ -330,7 +432,8 @@
     }
 
     .shop-list-button:hover,
-    .shop-list-summary button:not(:disabled):hover {
+    .shop-list-summary button:not(:disabled):hover,
+    .shop-list-checkout:hover {
         background: #eda714;
     }
 

@@ -12,8 +12,10 @@ import LoadingState from "../components/LoadingState";
 import ErrorState from "../components/ErrorState";
 import EmptyState from "../components/EmptyState";
 import AdminEditModal from "../components/AdminEditModal";
+import { useSitePreferences } from "../../context/SitePreferencesContext";
 
 export default function AdminUsers() {
+    const { t } = useSitePreferences();
 
     const [users, setUsers] = useState([]);
     const [selected, setSelected] = useState([]);
@@ -146,7 +148,7 @@ export default function AdminUsers() {
 
             <PageHeader
                 title="Users"
-                description="Manage registered customers and administrators."
+                description={t("Manage registered customers and administrators.")}
                 action={
                         <button
                             className="admin-primary-btn"
@@ -154,7 +156,7 @@ export default function AdminUsers() {
                             onClick={() => setAddingUser(true)}
                         >
                         <UserPlus size={17} />
-                        Add user
+                        {t("Add user")}
                     </button>
                 }
             />
@@ -164,7 +166,7 @@ export default function AdminUsers() {
                 <SearchInput
                     value={search}
                     onChange={setSearch}
-                    placeholder="Search users..."
+                    placeholder={t("Search users...")}
                 />
 
                 <label className="admin-filter">
@@ -172,9 +174,9 @@ export default function AdminUsers() {
                         value={roleFilter}
                         onChange={(event) => setRoleFilter(event.target.value)}
                     >
-                        <option value="">All roles</option>
-                        <option value="ADMIN">Admin</option>
-                        <option value="CUSTOMER">Customer</option>
+                        <option value="">{t("All roles")}</option>
+                        <option value="ADMIN">{t("Admin")}</option>
+                        <option value="CUSTOMER">{t("Customer")}</option>
                     </select>
                 </label>
 
@@ -187,15 +189,15 @@ export default function AdminUsers() {
                 />
 
                 <span className="admin-result-count">
-                    {filteredUsers.length} of {users.length} users
+                    {filteredUsers.length} {t("of")} {users.length} {t("users")}
                 </span>
 
             </div>
 
             {!filteredUsers.length ? (
                 <EmptyState
-                    title="No users found"
-                    description="No users match your search."
+                    title={t("No users found")}
+                    description={t("No users match your search.")}
                 />
             ) : (
                 <div className="admin-table-container users-table-container">
@@ -217,11 +219,11 @@ export default function AdminUsers() {
                                     />
                                 </th>
 
-                                <th>User</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>Role</th>
-                                <th>Actions</th>
+                                <th>{t("User")}</th>
+                                <th>{t("Email")}</th>
+                                <th>{t("Phone")}</th>
+                                <th>{t("Role")}</th>
+                                <th>{t("Actions")}</th>
 
                             </tr>
                         </thead>
@@ -287,10 +289,8 @@ export default function AdminUsers() {
 
                                         <td>
                                             <StatusBadge
-                                                status={
-                                                    user.role ||
-                                                    "CUSTOMER"
-                                                }
+                                                status={user.role || "CUSTOMER"}
+                                                label={t(user.role === "ADMIN" ? "Admin" : "Customer")}
                                             />
                                         </td>
 
@@ -299,10 +299,10 @@ export default function AdminUsers() {
                                                 className="table-edit-btn"
                                                 type="button"
                                                 onClick={() => setEditingUser(user)}
-                                                aria-label={`Edit ${user.username}`}
+                                                aria-label={`${t("Edit")} ${user.username}`}
                                             >
                                                 <Edit3 size={15} />
-                                                <span>Edit</span>
+                                                <span>{t("Edit")}</span>
                                             </button>
                                             <button
                                                 className="table-danger-btn"
@@ -335,8 +335,8 @@ export default function AdminUsers() {
 
             <ConfirmModal
                 open={confirmOpen}
-                title="Delete users?"
-                message={`You are about to delete ${selected.length} user(s). This action cannot be undone.`}
+                title={t("Delete users?")}
+                message={`${t("You are about to delete")} ${selected.length} ${t("users")}. ${t("This action cannot be undone.")}`}
                 onCancel={() =>
                     setConfirmOpen(false)
                 }
@@ -346,7 +346,7 @@ export default function AdminUsers() {
             {editingUser && (
                 <AdminEditModal
                     row={editingUser}
-                    title="User"
+                    title={t("User")}
                     fields={[
                         { key: "first_name", label: "First name" },
                         { key: "last_name", label: "Last name" },
@@ -376,7 +376,7 @@ export default function AdminUsers() {
 
             {addingUser && (
                 <AdminEditModal
-                    title="User"
+                    title={t("User")}
                     mode="create"
                     fields={[
                         { key: "username", label: "Username", required: true },

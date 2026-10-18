@@ -1,5 +1,5 @@
 import AdminResourcePage from "../components/AdminResourcePage";
-import { getPayments, deletePayment, updatePayment } from "../api/payments";
+import { getPayments } from "../api/payments";
 
 const columns = [
     { key: "user", label: "Customer" },
@@ -14,26 +14,12 @@ export default function AdminPayments() {
             title="Payments"
             description="Monitor payment records and statuses."
             load={getPayments}
-            remove={deletePayment}
-            update={updatePayment}
+            readOnly
             columns={columns}
             filters={[
                 {
                     key: "status",
                     label: "All statuses",
-                    options: [
-                        { value: "PENDING", label: "Pending" },
-                        { value: "CONFIRMED", label: "Confirmed" },
-                        { value: "CANCELLED", label: "Cancelled" },
-                    ],
-                },
-            ]}
-            editFields={[
-                { key: "amount", label: "Amount", type: "number", min: "0.01", step: "0.01", required: true },
-                {
-                    key: "status",
-                    label: "Status",
-                    type: "select",
                     options: [
                         { value: "PENDING", label: "Pending" },
                         { value: "CONFIRMED", label: "Confirmed" },

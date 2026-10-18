@@ -1,29 +1,56 @@
 
-import { useEffect, useMemo, useState } from "react";
-import { Package, SlidersHorizontal, ChevronDown } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { Package, SlidersHorizontal, ChevronDown, Check } from "lucide-react";
 
 import { getProducts } from "../api/products";
 import {
   addToCart,
+  getCategories,
   getFavourites,
   toggleFavourite,
 } from "../api";
 
 import { useNotifications } from "../context/NotificationContext";
+import { useSitePreferences } from "../context/SitePreferencesContext";
 import ProductCard from "../components/ProductCard";
 
 import "./Products.css";
 
+const GRID_REVEAL_DIRECTIONS = ["left", "right", "top", "bottom-left"];
+
 export default function Products() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(
+    () => searchParams.get("category") || "all"
+  );
   const [favouriteIds, setFavouriteIds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [sortBy, setSortBy] = useState("default");
   const [busyProduct, setBusyProduct] = useState("");
+  const productsGridRef = useRef(null);
 
   const { error: showError, success: showSuccess } =
     useNotifications();
+  const { t } = useSitePreferences();
+
+  useEffect(() => {
+    setSelectedCategory(searchParams.get("category") || "all");
+  }, [searchParams]);
+
+  function changeCategory(categoryUuid) {
+    setSelectedCategory(categoryUuid);
+    const nextParams = new URLSearchParams(searchParams);
+    if (categoryUuid === "all") {
+      nextParams.delete("category");
+    } else {
+      nextParams.set("category", categoryUuid);
+    }
+    setSearchParams(nextParams, { replace: true });
+  }
 
   // Load products from the API.
   useEffect(() => {
@@ -51,6 +78,22 @@ export default function Products() {
     }
 
     loadProducts();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getCategories()
+      .then((data) => {
+        if (!cancelled) setCategories(Array.isArray(data) ? data : []);
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      });
 
     return () => {
       cancelled = true;
@@ -163,7 +206,10 @@ export default function Products() {
 
   // Sort products.
   const sortedProducts = useMemo(() => {
-    const result = [...products];
+    const result = products.filter((product) =>
+      selectedCategory === "all" ||
+      product.category?.uuid === selectedCategory
+    );
 
     switch (sortBy) {
       case "price-low":
@@ -200,14 +246,53 @@ export default function Products() {
     }
 
     return result;
-  }, [products, sortBy]);
+  }, [products, selectedCategory, sortBy]);
+
+  useEffect(() => {
+    const grid = productsGridRef.current;
+    if (!grid) return undefined;
+
+    const cards = grid.querySelectorAll(".products-grid-item");
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    if (
+      prefersReducedMotion ||
+      typeof IntersectionObserver === "undefined"
+    ) {
+      cards.forEach((card) => {
+        card.dataset.revealState = "visible";
+      });
+      return undefined;
+    }
+
+    cards.forEach((card) => {
+      card.dataset.revealState = "hidden";
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          entry.target.dataset.revealState = "visible";
+          observer.unobserve(entry.target);
+        });
+      },
+      { rootMargin: "0px 0px -48px 0px", threshold: 0.12 }
+    );
+
+    cards.forEach((card) => observer.observe(card));
+    return () => observer.disconnect();
+  }, [sortedProducts]);
 
   // Loading state.
   if (loading) {
     return (
       <div className="products-loading">
         <div className="loading-spinner" />
-        <p>Loading products...</p>
+        <p>{t("Loading products...")}</p>
       </div>
     );
   }
@@ -217,7 +302,7 @@ export default function Products() {
     return (
       <div className="products-error">
         <Package size={45} />
-        <h2>Unable to load products</h2>
+        <h2>{t("Unable to load products")}</h2>
         <p>{error}</p>
 
         <button
@@ -225,7 +310,7 @@ export default function Products() {
           className="retry-btn"
           onClick={() => window.location.reload()}
         >
-          Try Again
+          {t("Try Again")}
         </button>
       </div>
     );
@@ -236,62 +321,113 @@ export default function Products() {
       <header className="products-header">
         <div className="products-title">
           <span className="products-subtitle">
-            OUR COLLECTION
+            {t("OUR COLLECTION")}
           </span>
 
-          <h1>Products</h1>
+          <h1>{t("Products")}</h1>
 
           <p>
-            Discover our products and find something perfect for you.
+            {t("Discover our products and find something perfect for you.")}
           </p>
         </div>
 
         <div className="products-count">
           <Package size={20} />
-          <span>{sortedProducts.length} Products</span>
+          <span>{sortedProducts.length} {t("Products")}</span>
         </div>
       </header>
 
-      <div className="products-toolbar">
-        <div className="product-sort">
-          <SlidersHorizontal size={17} />
-
-          <select
-            aria-label="Sort products"
-            value={sortBy}
-            onChange={(event) => setSortBy(event.target.value)}
+      <div className="products-layout">
+        <aside className="products-sidebar" aria-label={t("Product filters")}>
+          <div className="products-sidebar-heading">
+            <SlidersHorizontal size={17} />
+            <h2>{t("Categories")}</h2>
+          </div>
+          <button
+            type="button"
+            className={`category-filter${selectedCategory === "all" ? " is-active" : ""}`}
+            aria-pressed={selectedCategory === "all"}
+            onClick={() => changeCategory("all")}
           >
-            <option value="default">Sort by</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="name">Name: A–Z</option>
-            <option value="stock">Stock: High to Low</option>
-          </select>
+            <span>{t("All products")}</span>
+            {selectedCategory === "all" && <Check size={16} />}
+          </button>
+          {categories.map((category) => (
+            <button
+              type="button"
+              key={category.uuid}
+              className={`category-filter${selectedCategory === category.uuid ? " is-active" : ""}`}
+              aria-pressed={selectedCategory === category.uuid}
+              onClick={() => changeCategory(category.uuid)}
+            >
+              <span>{category.name}</span>
+              {selectedCategory === category.uuid && <Check size={16} />}
+            </button>
+          ))}
+        </aside>
 
-          <ChevronDown size={16} />
-        </div>
-      </div>
-
-      <div className="products-layout products-layout-no-sidebar">
         <div className="products-content">
+          <div className="products-toolbar">
+            <span className="toolbar-label">
+              <Package size={16} />
+              {sortedProducts.length} {t("Products")}
+            </span>
+            <label className="product-sort">
+              <SlidersHorizontal size={17} />
+              <span className="visually-hidden">{t("Sort products")}</span>
+              <select
+                aria-label={t("Sort products")}
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value)}
+              >
+                <option value="default">{t("Sort by")}</option>
+                <option value="price-low">{t("Price: Low to High")}</option>
+                <option value="price-high">{t("Price: High to Low")}</option>
+                <option value="name">{t("Name: A–Z")}</option>
+                <option value="stock">{t("Stock: High to Low")}</option>
+              </select>
+              <ChevronDown size={16} />
+            </label>
+          </div>
           {sortedProducts.length === 0 ? (
             <div className="empty-products">
               <Package size={50} />
-              <h2>No products available</h2>
-              <p>There are currently no products to display.</p>
+              <h2>{t("No products available")}</h2>
+              <p>{t("There are currently no products to display.")}</p>
             </div>
           ) : (
-            <div className="products-grid">
-              {sortedProducts.map((product) => (
-                <ProductCard
-                  key={product.uuid}
-                  product={product}
-                  onAddToCart={handleAddToCart}
-                  isFavourite={favouriteIds.includes(product.uuid)}
-                  onToggleFavourite={handleToggleFavourite}
-                  isBusy={busyProduct === product.uuid}
-                />
-              ))}
+            <div className="products-grid" ref={productsGridRef}>
+              {sortedProducts.map((product, index) => {
+                return (
+                  <div
+                    key={product.uuid}
+                    className="products-grid-item"
+                    data-reveal-direction={
+                      GRID_REVEAL_DIRECTIONS[
+                        index % GRID_REVEAL_DIRECTIONS.length
+                      ]
+                    }
+                    data-grid-size={
+                      sortedProducts.length >= 3 && index % 3 === 0
+                        ? "wide"
+                        : index % 2 === 0
+                          ? "standard"
+                          : "compact"
+                    }
+                    style={{
+                      "--reveal-delay": `${(index % 8) * 70}ms`,
+                    }}
+                  >
+                    <ProductCard
+                      product={product}
+                      onAddToCart={handleAddToCart}
+                      isFavourite={favouriteIds.includes(product.uuid)}
+                      onToggleFavourite={handleToggleFavourite}
+                      isBusy={busyProduct === product.uuid}
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

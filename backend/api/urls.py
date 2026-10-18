@@ -6,7 +6,8 @@ from .serializers import CustomTokenObtainPairSerializer
 from .views import (
     UserViewSet, CategoryViewSet, ProductViewSet,
     CartViewSet, CartItemViewSet, OrderViewSet,
-    FavouriteViewSet, PaymentViewSet
+    FavouriteViewSet, PaymentViewSet, ReviewViewSet,
+    InboxConversationViewSet, stripe_webhook,
 )
 
 
@@ -22,8 +23,11 @@ router.register(r'cart-items', CartItemViewSet, basename='cartitem')
 router.register(r'orders', OrderViewSet, basename='order')
 router.register(r'favourites', FavouriteViewSet)
 router.register(r'payments', PaymentViewSet)
+router.register(r'reviews', ReviewViewSet, basename='review')
+router.register(r'inbox', InboxConversationViewSet, basename='inbox')
 
 urlpatterns = [
+    path('webhooks/stripe/', stripe_webhook, name='stripe_webhook'),
     path('', include(router.urls)),
     path('auth/login/', CustomTokenObtainPairView.as_view(), name='custom_auth_login'),
     path('token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),

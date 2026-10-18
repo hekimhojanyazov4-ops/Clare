@@ -7,6 +7,7 @@ import ErrorState from "./ErrorState";
 import EmptyState from "./EmptyState";
 import AdminEditModal from "./AdminEditModal";
 import BulkActions from "./BulkActions";
+import { useSitePreferences } from "../../context/SitePreferencesContext";
 
 function getRows(data) {
     if (Array.isArray(data)) {
@@ -59,7 +60,9 @@ export default function AdminResourcePage({
     action,
     children,
     bulkRemove,
+    readOnly = false,
 }) {
+    const { t } = useSitePreferences();
     const [rows, setRows] = useState([]);
     const [search, setSearch] = useState("");
     const [loading, setLoading] = useState(true);
@@ -108,7 +111,7 @@ export default function AdminResourcePage({
     async function handleDelete(row) {
         const identifier = row.uuid || row.id;
 
-        if (!identifier || !window.confirm("Delete this record?")) {
+        if (!identifier || !window.confirm(t("Delete this record?"))) {
             return;
         }
 
@@ -155,7 +158,7 @@ export default function AdminResourcePage({
     }
 
     async function handleBulkDelete() {
-        if (!selected.length || !window.confirm(`Delete ${selected.length} records?`)) {
+        if (!selected.length || !window.confirm(`${t("Delete")} ${selected.length} ${t("records")}?`)) {
             return;
         }
 
@@ -182,10 +185,10 @@ export default function AdminResourcePage({
 
     return (
         <section className="admin-resource-page">
-            <PageHeader title={title} description={description} action={action}>
+            <PageHeader title={t(title)} description={t(description)} action={action}>
                 <button className="admin-secondary-btn" type="button" onClick={loadRows}>
                     <RefreshCw size={16} />
-                    Refresh
+                    {t("Refresh")}
                 </button>
             </PageHeader>
 
@@ -199,7 +202,7 @@ export default function AdminResourcePage({
                     <input
                         value={search}
                         onChange={(event) => setSearch(event.target.value)}
-                        placeholder={`Search ${title.toLowerCase()}...`}
+                        placeholder={`${t("Search")} ${t(title)}...`}
                     />
                 </label>
                 {filters.map((filter) => (
@@ -214,16 +217,18 @@ export default function AdminResourcePage({
                                 }))
                             }
                         >
-                            <option value="">{filter.label}</option>
+                            <option value="">{t(filter.label)}</option>
                             {filter.options.map((option) => (
                                 <option key={option.value} value={option.value}>
-                                    {option.label}
+                                    {filter.translateOptions === false
+                                        ? option.label
+                                        : t(option.label)}
                                 </option>
                             ))}
                         </select>
                     </label>
                 ))}
-                <span className="admin-result-count">{filteredRows.length} records</span>
+                <span className="admin-result-count">{filteredRows.length} {t("records")}</span>
                 {bulkRemove && (
                     <BulkActions
                         selectedCount={selected.length}
@@ -234,7 +239,7 @@ export default function AdminResourcePage({
             </div>
 
             {!filteredRows.length ? (
-                <EmptyState title={`No ${title.toLowerCase()} found`} description={emptyMessage} />
+                <EmptyState title={t(`No ${title.toLowerCase()} found`)} description={t(emptyMessage)} />
             ) : (
                 <div className="admin-table-container">
                     <table className="admin-table">
@@ -246,12 +251,14 @@ export default function AdminResourcePage({
                                             type="checkbox"
                                             checked={filteredRows.length > 0 && selected.length === filteredRows.length}
                                             onChange={toggleAll}
-                                            aria-label="Select all records"
+                                            aria-label={t("Select all records")}
                                         />
                                     </th>
                                 )}
-                                {columns.map((column) => <th key={column.key}>{column.label}</th>)}
-                                <th>Actions</th>
+                                {columns.map((column) => (
+                                    <th key={column.key}>{t(column.label)}</th>
+                                ))}
+                                {!readOnly && <th>{t("Actions")}</th>}
                             </tr>
                         </thead>
                         <tbody>
@@ -265,7 +272,7 @@ export default function AdminResourcePage({
                                                     type="checkbox"
                                                     checked={selected.includes(identifier)}
                                                     onChange={() => toggleSelected(identifier)}
-                                                    aria-label={`Select ${title.toLowerCase()} record`}
+                                                    aria-label={`${t("Select")} ${t(title)} ${t("record")}`}
                                                 />
                                             </td>
                                         )}
@@ -274,27 +281,31 @@ export default function AdminResourcePage({
                                                 {displayValue(row[column.key])}
                                             </td>
                                         ))}
-                                        <td>
-                                            {update && editFields.length > 0 && (
-                                                <button
-                                                    className="table-edit-btn"
-                                                    type="button"
-                                                    onClick={() => setEditingRow(row)}
-                                                    aria-label={`Edit ${title.toLowerCase()} record`}
-                                                >
-                                                    <Edit3 size={16} />
-                                                </button>
-                                            )}
-                                            <button
-                                                className="table-danger-btn"
-                                                type="button"
-                                                disabled={deleting === identifier}
-                                                onClick={() => handleDelete(row)}
-                                                aria-label={`Delete ${title.toLowerCase()} record`}
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </td>
+                                        {!readOnly && (
+                                            <td>
+                                                {update && editFields.length > 0 && (
+                                                    <button
+                                                        className="table-edit-btn"
+                                                        type="button"
+                                                        onClick={() => setEditingRow(row)}
+                                                        aria-label={`${t("Edit")} ${t(title)} ${t("record")}`}
+                                                    >
+                                                        <Edit3 size={16} />
+                                                    </button>
+                                                )}
+                                                {remove && (
+                                                    <button
+                                                        className="table-danger-btn"
+                                                        type="button"
+                                                        disabled={deleting === identifier}
+                                                        onClick={() => handleDelete(row)}
+                                                        aria-label={`${t("Delete")} ${t(title)} ${t("record")}`}
+                                                    >
+                                                        <Trash2 size={16} />
+                                                    </button>
+                                                )}
+                                            </td>
+                                        )}
                                     </tr>
                                 );
                             })}
@@ -307,7 +318,7 @@ export default function AdminResourcePage({
                 <AdminEditModal
                     row={editingRow}
                     fields={editFields}
-                    title={title.slice(0, -1)}
+                    title={t(title.slice(0, -1))}
                     onClose={() => setEditingRow(null)}
                     onSave={(payload) =>
                         handleUpdate(editingRow.uuid || editingRow.id, payload)

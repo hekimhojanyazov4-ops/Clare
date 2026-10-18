@@ -3,7 +3,8 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import (
     User, Category, Product, Cart, CartItem,
-    Order, OrderItem, Favourite, Payment, ProductImage, Review
+    Order, OrderItem, Favourite, Payment, ProductImage, Review,
+    InboxConversation, InboxMessage,
 )
 
 
@@ -135,3 +136,26 @@ class ReviewAdmin(admin.ModelAdmin):
     list_filter = ('user', 'ratings',)
     list_editable = ('ratings',)
     ordering = ('-created_at',)
+
+
+class InboxMessageInline(admin.TabularInline):
+    model = InboxMessage
+    extra = 0
+    readonly_fields = ('uuid', 'sender', 'body', 'created_at', 'read_at')
+    can_delete = False
+
+
+@admin.register(InboxConversation)
+class InboxConversationAdmin(admin.ModelAdmin):
+    list_display = ('subject', 'user', 'created_at', 'updated_at')
+    list_filter = ('created_at',)
+    search_fields = ('subject', 'user__username', 'user__email')
+    readonly_fields = ('uuid', 'created_at', 'updated_at')
+    inlines = [InboxMessageInline]
+
+
+@admin.register(InboxMessage)
+class InboxMessageAdmin(admin.ModelAdmin):
+    list_display = ('uuid', 'conversation', 'sender', 'created_at', 'read_at')
+    search_fields = ('conversation__subject', 'sender__username', 'body')
+    readonly_fields = ('uuid', 'created_at', 'read_at')

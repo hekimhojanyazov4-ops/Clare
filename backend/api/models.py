@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator, RegexValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
 from django.db.models.constraints import UniqueConstraint
 
 
@@ -54,7 +54,9 @@ class Product(UUIDModel):
 
     @property
     def get_discount_price(self):
-        return self.discount_price if self.discount_price else self.price
+        if self.discount_price is not None:
+            return self.discount_price
+        return self.price
 
     def __str__(self):
         return f"{self.name} x {self.stock}"
@@ -88,6 +90,11 @@ class CartItem(UUIDModel):
 
 
 class Order(UUIDModel):
+    class Status(models.TextChoices):
+        PENDING = 'PENDING', 'Pending payment'
+        CONFIRMED = 'CONFIRMED', 'Confirmed'
+        CANCELLED = 'CANCELLED', 'Cancelled'
+
     created_at = models.DateTimeField(auto_now_add=True)
     customer = models.ForeignKey(
         User,
@@ -95,19 +102,55 @@ class Order(UUIDModel):
         on_delete=models.CASCADE,
         related_name='orders'
     )
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    idempotency_key = models.UUIDField(blank=True, null=True)
 
     @property
     def total_price(self):
-        return sum(item.product.get_discount_price() * item.quantity for item in self.order_items.all())
+        return sum(
+            (
+                item.unit_price
+                if item.unit_price is not None
+                else item.product.get_discount_price
+            ) * item.quantity
+            for item in self.order_items.select_related('product').all()
+        )
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['customer', 'idempotency_key'],
+                name='unique_customer_checkout_key',
+            )
+        ]
 
     def __str__(self):
         return f"{self.uuid} by {self.customer.username}"
 
 
 class OrderItem(UUIDModel):
-    product = models.ForeignKey(Product, related_name='order_items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, related_name='order_items', on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
     order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE)
+    product_name = models.CharField(max_length=200, blank=True, null=True)
+    unit_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+    )
+
+    def save(self, *args, **kwargs):
+        if self.product_id:
+            if not self.product_name:
+                self.product_name = self.product.name
+            if self.unit_price is None:
+                self.unit_price = self.product.get_discount_price
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.order.uuid} - {self.product.name} x {self.quantity}"
@@ -148,10 +191,31 @@ class Payment(UUIDModel):
         blank=True,
         null=True
     )
+    stripe_session_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+        unique=True,
+    )
+    stripe_payment_intent_id = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.amount} - {self.user.username}"
+
+
+class StripeWebhookEvent(models.Model):
+    event_id = models.CharField(max_length=255, primary_key=True)
+    event_type = models.CharField(max_length=120)
+    received_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.event_id
+
 
 class ProductImage(models.Model):
     image = models.ImageField(upload_to='product_images/')
@@ -169,7 +233,10 @@ class ProductImage(models.Model):
 
 class Review(UUIDModel):
     user = models.ForeignKey(User, related_name='reviews', on_delete=models.CASCADE)
-    ratings = models.PositiveIntegerField(default=0, validators=[MinValueValidator(1), MinValueValidator(5)])
+    ratings = models.PositiveIntegerField(
+        default=1,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+    )
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     comment = models.TextField(db_index = True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -180,6 +247,43 @@ class Review(UUIDModel):
         unique_together = ('product', 'user',)
 
     def __str__(self):
-        return f"{self.ratings} for {self.product.name} by {self.user.get_full_name}"
+        return f"{self.ratings} for {self.product.name} by {self.user.get_full_name()}"
 
-    
+
+class InboxConversation(UUIDModel):
+    user = models.ForeignKey(
+        User,
+        related_name='inbox_conversations',
+        on_delete=models.CASCADE,
+    )
+    subject = models.CharField(max_length=180)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f"{self.subject} ({self.user.username})"
+
+
+class InboxMessage(UUIDModel):
+    conversation = models.ForeignKey(
+        InboxConversation,
+        related_name='messages',
+        on_delete=models.CASCADE,
+    )
+    sender = models.ForeignKey(
+        User,
+        related_name='inbox_messages',
+        on_delete=models.CASCADE,
+    )
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Message in {self.conversation.uuid} by {self.sender.username}"

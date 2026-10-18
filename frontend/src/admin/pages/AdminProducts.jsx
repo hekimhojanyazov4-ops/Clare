@@ -11,6 +11,7 @@ import {
     deleteProduct,
     updateProduct,
 } from "../api/products";
+import { useSitePreferences } from "../../context/SitePreferencesContext";
 
 const columns = [
     { key: "name", label: "Product" },
@@ -20,6 +21,7 @@ const columns = [
 ];
 
 export default function AdminProducts() {
+    const { t } = useSitePreferences();
     const [categories, setCategories] = useState([]);
     const [addingProduct, setAddingProduct] = useState(false);
 
@@ -46,7 +48,7 @@ export default function AdminProducts() {
                     onClick={() => setAddingProduct(true)}
                 >
                     <PackagePlus size={17} />
-                    Add product
+                    {t("Add product")}
                 </button>
             )}
             columns={columns}
@@ -54,6 +56,7 @@ export default function AdminProducts() {
                 {
                     key: "category",
                     label: "All categories",
+                    translateOptions: false,
                     getValue: (row) => row.category?.uuid,
                     options: categories.map((category) => ({
                         value: category.uuid,
@@ -86,6 +89,7 @@ export default function AdminProducts() {
                             label: "Category",
                             type: "select",
                             required: true,
+                            translateOptions: false,
                             options: categories.map((category) => ({
                                 value: category.uuid,
                                 label: category.name,

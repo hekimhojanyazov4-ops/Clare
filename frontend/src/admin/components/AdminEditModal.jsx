@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSitePreferences } from "../../context/SitePreferencesContext";
 
 const EMPTY_ROW = {};
 
@@ -29,6 +30,7 @@ export default function AdminEditModal({
     onClose,
     onSave,
 }) {
+    const { t } = useSitePreferences();
     const [values, setValues] = useState(() => getInitialValues(row, fields));
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState("");
@@ -85,23 +87,23 @@ export default function AdminEditModal({
                 aria-labelledby="admin-edit-title"
                 onMouseDown={(event) => event.stopPropagation()}
             >
-                <button className="modal-close" type="button" onClick={onClose} aria-label="Close edit form">
+                <button className="modal-close" type="button" onClick={onClose} aria-label={t("Close edit form")}>
                     <X size={18} />
                 </button>
 
                 <h2 id="admin-edit-title">
-                    {mode === "create" ? `Add ${title}` : `Edit ${title}`}
+                    {mode === "create" ? `${t("Add")} ${title}` : `${t("Edit")} ${title}`}
                 </h2>
                 <p>
                     {mode === "create"
-                        ? `Add a new ${title.toLowerCase()} to your store.`
-                        : "Update the selected record and save your changes."}
+                        ? `${t("Add a new")} ${title.toLowerCase()} ${t("to your store.")}`
+                        : t("Update the selected record and save your changes.")}
                 </p>
 
                 <form className="admin-edit-form" onSubmit={handleSubmit}>
                     {fields.map((field) => (
                         <label key={field.key}>
-                            <span>{field.label}</span>
+                            <span>{t(field.label)}</span>
                             {field.type === "textarea" || field.type === "json" ? (
                                 <textarea
                                     rows={field.type === "json" ? 6 : 4}
@@ -117,7 +119,9 @@ export default function AdminEditModal({
                                 >
                                     {field.options.map((option) => (
                                         <option key={option.value} value={option.value}>
-                                            {option.label}
+                                            {field.translateOptions === false
+                                                ? option.label
+                                                : t(option.label)}
                                         </option>
                                     ))}
                                 </select>
@@ -150,14 +154,14 @@ export default function AdminEditModal({
 
                     <div className="modal-actions">
                         <button className="cancel-btn" type="button" onClick={onClose}>
-                            Cancel
+                            {t("Cancel")}
                         </button>
                         <button className="admin-primary-btn" type="submit" disabled={saving}>
                             {saving
-                                ? "Saving..."
+                                ? t("Saving...")
                                 : mode === "create"
-                                    ? `Add ${title}`
-                                    : "Save changes"}
+                                    ? `${t("Add")} ${title}`
+                                    : t("Save changes")}
                         </button>
                     </div>
                 </form>

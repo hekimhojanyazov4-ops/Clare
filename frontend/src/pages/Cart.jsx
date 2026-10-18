@@ -6,6 +6,7 @@ import { getProducts } from "../api";
 import { getCart, removeCartItem, updateCartItem } from "../api";
 import { resolveProductImage } from "../utils/productImage";
 import { useNotifications } from "../context/NotificationContext";
+import { useSitePreferences } from "../context/SitePreferencesContext";
 import "./ShopLists.css";
 
 export default function Cart() {
@@ -15,6 +16,7 @@ export default function Cart() {
     // Holds what the user is currently typing, keyed by product_uuid
     const [drafts, setDrafts] = useState({});
     const { error: showError, success: showSuccess } = useNotifications();
+    const { t } = useSitePreferences();
 
     useEffect(() => {
         async function loadCart() {
@@ -50,7 +52,14 @@ export default function Cart() {
     }
 
     async function changeQuantity(item, quantity) {
-        const maxStock = Number(item.product.stock) || 1;
+        const stock = Number(item.product.stock);
+        const stockKnown =
+            item.product.stock !== null &&
+            item.product.stock !== undefined &&
+            item.product.stock !== "" &&
+            Number.isSafeInteger(stock) &&
+            stock >= 0;
+        const maxStock = stockKnown ? Math.max(stock, 1) : item.quantity;
         const nextQuantity = Math.max(1, Math.min(maxStock, Math.floor(Number(quantity)) || 1));
 
         clearDraft(item.product_uuid);
@@ -104,34 +113,47 @@ export default function Cart() {
         }
     }
 
-    const total = items.reduce(
-        (sum, item) => sum + Number(item.product.discount_price || item.product.price) * item.quantity,
+    const totalCents = items.reduce(
+        (sum, item) => {
+            const unitPrice = Number(item.product.discount_price ?? item.product.price);
+            return sum + Math.round(unitPrice * 100) * item.quantity;
+        },
         0
     );
+    const total = totalCents / 100;
 
-    if (loading) return <section className="shop-list-page"><p>Loading your cart...</p></section>;
+    if (loading) return <section className="shop-list-page"><p>{t("Loading your cart...")}</p></section>;
     if (error) return <section className="shop-list-page"><div className="shop-list-error">{error}</div></section>;
 
     return (
         <section className="shop-list-page">
             <div className="shop-list-heading">
-                <span className="shop-list-kicker">YOUR SHOPPING BAG</span>
-                <h1>Shopping Cart</h1>
-                <p>Review your products before checkout.</p>
+                <span className="shop-list-kicker">{t("YOUR SHOPPING BAG")}</span>
+                <h1>{t("Shopping Cart")}</h1>
+                <p>{t("Review your products before checkout.")}</p>
             </div>
 
             {!items.length ? (
                 <div className="shop-list-empty">
                     <FiShoppingCart size={45} />
-                    <h2>Your cart is empty</h2>
-                    <p>Add products to your cart to see them here.</p>
-                    <Link to="/products/" className="shop-list-button">Browse products <FiArrowRight /></Link>
+                    <h2>{t("Your cart is empty")}</h2>
+                    <p>{t("Add products to your cart to see them here.")}</p>
+                    <Link to="/products/" className="shop-list-button">{t("Browse products")} <FiArrowRight /></Link>
                 </div>
             ) : (
                 <div className="shop-list-layout">
                     <div className="shop-list-items">
                         {items.map((item) => {
-                            const maxStock = Number(item.product.stock) || 1;
+                            const stock = Number(item.product.stock);
+                            const stockKnown =
+                                item.product.stock !== null &&
+                                item.product.stock !== undefined &&
+                                item.product.stock !== "" &&
+                                Number.isSafeInteger(stock) &&
+                                stock >= 0;
+                            const maxStock = stockKnown
+                                ? Math.max(stock, 1)
+                                : item.quantity;
                             const draft = drafts[item.product_uuid];
                             const inputValue = draft !== undefined ? draft : item.quantity;
 
@@ -142,13 +164,13 @@ export default function Cart() {
                                     </div>
                                     <div className="shop-list-item-info">
                                         <h2>{item.product.name}</h2>
-                                        <span>${Number(item.product.discount_price || item.product.price).toFixed(2)}</span>
+                                        <span>${Number(item.product.discount_price ?? item.product.price).toFixed(2)}</span>
                                         <div className="quantity-control">
                                             <button
                                                 type="button"
                                                 onClick={() => changeQuantity(item, item.quantity - 1)}
                                                 disabled={item.quantity <= 1}
-                                                aria-label="Decrease quantity"
+                                                aria-label={t("Decrease quantity")}
                                             >
                                                 <FiMinus />
                                             </button>
@@ -162,26 +184,31 @@ export default function Cart() {
                                                 onBlur={() => commitDraft(item)}
                                                 onKeyDown={(event) => handleInputKeyDown(event, item)}
                                                 onFocus={(event) => event.target.select()}
-                                                aria-label={`Quantity for ${item.product.name}`}
+                                                aria-label={`${t("Quantity")} for ${item.product.name}`}
                                             />
                                             <button
                                                 type="button"
                                                 onClick={() => changeQuantity(item, item.quantity + 1)}
                                                 disabled={item.quantity >= maxStock}
-                                                aria-label="Increase quantity"
+                                                aria-label={t("Increase quantity")}
                                             >
                                                 <FiPlus />
                                             </button>
                                         </div>
-                                        {Number.isFinite(Number(item.product.stock)) && item.product.stock !== undefined && (
-                                            <small className="quantity-hint">Max available: {maxStock}</small>
+                                        {stockKnown && (
+                                            <small className="quantity-hint">{t("Max available:")} {maxStock}</small>
+                                        )}
+                                        {!stockKnown && (
+                                            <small className="quantity-hint">
+                                                {t("Availability unavailable. Quantity cannot be increased.")}
+                                            </small>
                                         )}
                                     </div>
                                     <button
                                         className="shop-list-remove"
                                         type="button"
                                         onClick={() => removeItem(item)}
-                                        aria-label={`Remove ${item.product.name}`}
+                                        aria-label={`${t("Remove")} ${item.product.name}`}
                                     >
                                         <FiTrash2 />
                                     </button>
@@ -190,9 +217,11 @@ export default function Cart() {
                         })}
                     </div>
                     <aside className="shop-list-summary">
-                        <span>Total</span>
+                        <span>{t("Total")}</span>
                         <strong>${total.toFixed(2)}</strong>
-                        <button type="button" disabled>Checkout coming soon</button>
+                        <Link className="shop-list-checkout" to="/checkout/">
+                            {t("Checkout")}
+                        </Link>
                     </aside>
                 </div>
             )}

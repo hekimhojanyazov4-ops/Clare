@@ -4,6 +4,7 @@ import { FiEye, FiEyeOff, FiLock, FiLogIn, FiUser } from "react-icons/fi";
 
 import { loginUser } from "../apis/auth";
 import { useNotifications } from "../context/NotificationContext";
+import { useSitePreferences } from "../context/SitePreferencesContext";
 import "./Auth.css";
 
 const Login = () => {
@@ -16,6 +17,7 @@ const Login = () => {
 
     const [loading, setLoading] = useState(false);
     const { error: showError, success: showSuccess } = useNotifications();
+    const { t } = useSitePreferences();
 
     const handleSubmit = async (event) => {
 
@@ -85,19 +87,19 @@ const Login = () => {
         <section className="auth-page">
             <div className="auth-card">
                 <div className="auth-heading">
-                    <span className="auth-kicker">WELCOME BACK</span>
-                    <h1>Login</h1>
-                    <p>Login to your account.</p>
+                    <span className="auth-kicker">{t("WELCOME BACK")}</span>
+                    <h1>{t("Login")}</h1>
+                    <p>{t("Login to your account.")}</p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
 
                     <label className="auth-field">
-                        <span>Username</span>
+                        <span>{t("Username")}</span>
                         <FiUser />
                         <input
                             type="text"
-                            placeholder="Enter your username"
+                            placeholder={t("Enter your username")}
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             required
@@ -105,11 +107,11 @@ const Login = () => {
                     </label>
 
                     <label className="auth-field">
-                        <span>Password</span>
+                        <span>{t("Password")}</span>
                         <FiLock />
                         <input
                             type={showPassword ? "text" : "password"}
-                            placeholder="Enter your password"
+                            placeholder={t("Enter your password")}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
@@ -118,7 +120,7 @@ const Login = () => {
                             className="password-toggle"
                             type="button"
                             onClick={() => setShowPassword((visible) => !visible)}
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            aria-label={t(showPassword ? "Hide password" : "Show password")}
                         >
                             {showPassword ? <FiEyeOff /> : <FiEye />}
                         </button>
@@ -127,17 +129,17 @@ const Login = () => {
                     <button className="auth-submit" type="submit" disabled={loading}>
                         <FiLogIn />
                         {loading
-                            ? "Logging in..."
-                            : "Login"}
+                            ? t("Logging in...")
+                            : t("Login")}
                     </button>
 
                 </form>
 
                 <p className="auth-footer-text">
-                    Don't have an account?{" "}
+                    {t("Don't have an account?")}{" "}
 
                     <Link to="/register/">
-                        Register
+                        {t("Register")}
                     </Link>
                 </p>
 

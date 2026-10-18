@@ -1,0 +1,241 @@
+html[data-theme="dark"] {
+    color-scheme: dark;
+    --store-text: #f0f1f2;
+    --store-muted: #aeb4ba;
+    --store-background: #121416;
+    --store-hero-background: #201d1c;
+    --store-input-background: #25292d;
+    --store-border: #373c41;
+    --store-hover: #292d31;
+}
+
+html[data-theme="dark"] body,
+html[data-theme="dark"] .main-content,
+html[data-theme="dark"] .admin-shell {
+    background-color: #121416;
+    color: #eceff1;
+}
+
+html[data-theme="dark"] .store-header,
+html[data-theme="dark"] .main-header,
+html[data-theme="dark"] .announcement-bar,
+html[data-theme="dark"] .primary-navigation {
+    background-color: #171a1d;
+    color: #e8eaed;
+    border-color: #30353a;
+}
+
+html[data-theme="dark"] .store-header :is(a, button, span, p, label),
+html[data-theme="dark"] .store-header .clare-wordmark {
+    color: #e8eaed;
+}
+
+html[data-theme="dark"] .store-search,
+html[data-theme="dark"] .header-dropdown,
+html[data-theme="dark"] .header-dropdown a,
+html[data-theme="dark"] .navigation-links {
+    background-color: #22262a;
+    color: #e8eaed;
+    border-color: #3b4147;
+}
+
+html[data-theme="dark"] .store-search input,
+html[data-theme="dark"] .store-search .search-submit {
+    color: #f2f3f4;
+}
+
+html[data-theme="dark"] .store-header .all-categories-button,
+html[data-theme="dark"] .store-header .navigation-shop-button {
+    background-color: #f4a900;
+    color: #171717;
+}
+
+html[data-theme="dark"] .mobile-menu-open .navigation-links {
+    background-color: #22262a;
+    color: #f2f3f4;
+}
+
+html[data-theme="dark"] .main-content:not(.home-shell):not(.cinematic-shell) {
+    color: #eceff1;
+}
+
+html[data-theme="dark"] .main-content:not(.home-shell):not(.cinematic-shell) :is(
+    section, article, aside, form, header, footer, .products-count,
+    .products-sidebar, .empty-products, .product-card, .product-detail-card,
+    .product-detail-main, .product-detail-info, .product-reviews,
+    .related-products, .recently-viewed, .cart-card, .cart-summary,
+    .order-card, .payment-card, .favourite-card, .auth-card, .login-card,
+    .register-card, .empty-state, .modal-content
+) {
+    background-color: #1b1f23;
+    border-color: #353b41;
+    color: #eceff1;
+}
+
+html[data-theme="dark"] .main-content:not(.home-shell):not(.cinematic-shell) *:not(svg):not(img) {
+    color: #e7e9eb;
+    border-color: #353b41;
+}
+
+html[data-theme="dark"] .main-content:not(.home-shell):not(.cinematic-shell) :is(
+    input, select, textarea
+) {
+    background-color: #252a2f;
+    color: #f1f3f4;
+    border-color: #41474e;
+}
+
+html[data-theme="dark"] .main-content:not(.home-shell):not(.cinematic-shell) :is(
+    input, select, textarea
+)::placeholder {
+    color: #a7adb3;
+}
+
+html[data-theme="dark"] .main-content:not(.home-shell):not(.cinematic-shell) .product-image-wrapper,
+html[data-theme="dark"] .main-content:not(.home-shell):not(.cinematic-shell) .product-image-placeholder {
+    background-color: #24292e;
+}
+
+html[data-theme="dark"] .products-page,
+html[data-theme="dark"] .product-detail-page,
+html[data-theme="dark"] .products-loading,
+html[data-theme="dark"] .products-error {
+    background-color: #121416;
+    color: #eceff1;
+}
+
+html[data-theme="dark"] .products-sidebar-heading h2,
+html[data-theme="dark"] .products-header h1,
+html[data-theme="dark"] .products-error h2,
+html[data-theme="dark"] .empty-products h2 {
+    color: #f3f4f5;
+}
+
+html[data-theme="dark"] .product-sort,
+html[data-theme="dark"] .category-filter,
+html[data-theme="dark"] .qty-selector {
+    background-color: #22262a;
+    color: #e8eaed;
+    border-color: #3b4147;
+}
+
+html[data-theme="dark"] .category-filter.is-active,
+html[data-theme="dark"] .category-filter:hover {
+    background-color: #302a41;
+    color: #d4c5ff;
+}
+
+html[data-theme="dark"] .admin-sidebar,
+html[data-theme="dark"] .admin-header,
+html[data-theme="dark"] .admin-content,
+html[data-theme="dark"] .admin-card,
+html[data-theme="dark"] .admin-table-wrapper,
+html[data-theme="dark"] .admin-modal,
+html[data-theme="dark"] .admin-panel,
+html[data-theme="dark"] .admin-layout {
+    background-color: #1b1f23;
+    color: #eceff1;
+    border-color: #353b41;
+}
+
+html[data-theme="dark"] .admin-layout :is(h1, h2, h3, p, span, label, th, td, strong, a) {
+    color: #e7e9eb;
+}
+
+html[data-theme="dark"] .admin-layout :is(input, select, textarea) {
+    background-color: #252a2f;
+    color: #f1f3f4;
+    border-color: #41474e;
+}
+
+html[data-theme="dark"] .home-shell {
+    background-color: #121416;
+    color: #eceff1;
+}
+
+html[data-theme="dark"] .home-shell :is(
+    section, article, aside, form, header, footer,
+    [class*="card"], [class*="tile"], [class*="benefit"], [class*="testimonial"]
+) {
+    background-color: #1b1f23;
+    border-color: #353b41;
+    color: #eceff1;
+}
+
+html[data-theme="dark"] .home-shell :is(h1, h2, h3, h4, p, span, a, strong, small) {
+    color: #eceff1;
+}
+
+html[data-theme="dark"] .admin-language-control select,
+html[data-theme="dark"] .admin-theme-toggle {
+    min-height: 34px;
+    border: 1px solid #41474e;
+    border-radius: 6px;
+    background: #252a2f;
+    color: #eceff1;
+}
+
+html[data-theme="dark"] .admin-theme-toggle {
+    display: inline-grid;
+    width: 36px;
+    place-items: center;
+    cursor: pointer;
+}
+
+.admin-language-control select {
+    min-height: 34px;
+    max-width: 105px;
+    padding: 0 7px;
+    border: 1px solid #dce1e6;
+    border-radius: 6px;
+    background: #fff;
+    color: #303841;
+    font: inherit;
+}
+
+.admin-theme-toggle {
+    display: inline-grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 1px solid #dce1e6;
+    border-radius: 6px;
+    background: #fff;
+    color: #303841;
+    cursor: pointer;
+}
+
+html[data-theme="dark"] .store-footer,
+html[data-theme="dark"] .site-footer,
+html[data-theme="dark"] footer.site-footer {
+    background-color: #171a1d;
+    color: #e8eaed;
+    border-color: #30353a;
+}
+
+button:not(:disabled) {
+    transition-property: transform, background-color, border-color, box-shadow, color, filter;
+    transition-duration: 160ms;
+    transition-timing-function: ease;
+}
+
+button:not(:disabled):active {
+    transform: scale(0.975);
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible {
+    outline: 3px solid #9c7bff;
+    outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button:not(:disabled) {
+        transition: none !important;
+    }
+
+    button:not(:disabled):active {
+        transform: none;
+    }
+}

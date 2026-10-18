@@ -4,6 +4,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Footer from "./components/Footer";
 import './styles.css'
+import "./theme.css";
 
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -11,6 +12,8 @@ import ProductDetail from "./pages/ProductDetail";
 import Orders from "./pages/Orders";
 import Cart from "./pages/Cart";
 import Payments from "./pages/Payments";
+import Checkout from "./pages/Checkout";
+import CheckoutResult from "./pages/CheckoutResult";
 import Favourites from "./pages/Favourites";
 import Register from "./pages/Register";
 import Login from "./pages/Login";
@@ -56,6 +59,8 @@ const App = () => {
                 <Route path="/products/:uuid/" element={<ProductDetail />} />
                 <Route path="/orders/" element={<Orders />} />
                 <Route path="/cart/" element={<Cart />} />
+                <Route path="/checkout/" element={<Checkout />} />
+                <Route path="/checkout/result/" element={<CheckoutResult />} />
                 <Route path="/payments/" element={<Payments />} />
                 <Route path="/favourites/" element={<Favourites />} />
                 <Route path="/register/" element={<Register />} />

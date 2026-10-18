@@ -1,5 +1,6 @@
 export default function StatusBadge({
     status,
+    label,
 }) {
     const normalized =
         String(status || "unknown")
@@ -10,7 +11,7 @@ export default function StatusBadge({
         <span
             className={`status-badge status-${normalized}`}
         >
-            {String(status || "Unknown")}
+            {label || String(status || "Unknown")}
         </span>
     );
 }

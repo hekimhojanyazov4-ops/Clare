@@ -18,8 +18,10 @@ import { getProducts } from "../api/products";
 import { getOrders } from "../api/orders";
 import { getPayments } from "../api/payments";
 import { getCarts } from "../api/carts";
+import { useSitePreferences } from "../../context/SitePreferencesContext";
 
 export default function AdminDashboard() {
+    const { t } = useSitePreferences();
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -152,9 +154,9 @@ export default function AdminDashboard() {
 
             <div className="admin-page-header">
                 <div>
-                    <h1>Dashboard</h1>
+                    <h1>{t("Dashboard")}</h1>
                     <p>
-                        Overview of your store
+                        {t("Overview of your store")}
                     </p>
                 </div>
             </div>
@@ -162,37 +164,37 @@ export default function AdminDashboard() {
             <div className="admin-stats-grid">
 
                 <StatCard
-                    title="Users"
+                    title={t("Users")}
                     value={users.length}
                     icon={Users}
                 />
 
                 <StatCard
-                    title="Products"
+                    title={t("Products")}
                     value={products.length}
                     icon={Package}
                 />
 
                 <StatCard
-                    title="Orders"
+                    title={t("Orders")}
                     value={orders.length}
                     icon={ShoppingBag}
                 />
 
                 <StatCard
-                    title="Revenue"
+                    title={t("Revenue")}
                     value={`$${revenue.toLocaleString()}`}
                     icon={DollarSign}
                 />
 
                 <StatCard
-                    title="Products in carts"
+                    title={t("Products in carts")}
                     value={cartProductCount}
                     icon={ShoppingCart}
                 />
 
                 <StatCard
-                    title="Payments"
+                    title={t("Payments")}
                     value={payments.length}
                     icon={CreditCard}
                 />
@@ -207,11 +209,11 @@ export default function AdminDashboard() {
 
                         <div>
                             <h2>
-                                Best buyers
+                                {t("Best buyers")}
                             </h2>
 
                             <p>
-                                Customers by completed purchase value
+                                {t("Customers by completed purchase value")}
                             </p>
                         </div>
 

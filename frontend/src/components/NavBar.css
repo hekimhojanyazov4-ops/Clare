@@ -46,6 +46,34 @@
   color: #555;
 }
 
+.language-control select,
+.theme-toggle {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+.language-control select {
+  max-width: 95px;
+  padding: 3px 1px;
+  cursor: pointer;
+}
+
+.theme-toggle {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: rgb(120 120 120 / 12%);
+}
+
 .announcement-options a {
   color: inherit;
   text-decoration: none;
@@ -621,8 +649,25 @@
 }
 
 @media (max-width: 390px) {
+  .announcement-inner > p {
+    max-width: 42%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .announcement-options {
+    display: flex;
+    gap: 7px;
+    font-size: 9px;
+  }
+
+  .announcement-options > a {
     display: none;
+  }
+
+  .language-control select {
+    max-width: 74px;
   }
 
   .store-search {

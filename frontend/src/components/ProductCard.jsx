@@ -13,15 +13,24 @@ import {
 
 import "./ProductCard.css";
 import { resolveProductImage } from "../utils/productImage";
+import { useSitePreferences } from "../context/SitePreferencesContext";
 
-export default function ProductCard({ product, onAddToCart }) {
+export default function ProductCard({
+    product,
+    onAddToCart,
+    isFavourite = false,
+    onToggleFavourite,
+    isBusy = false,
+}) {
     const navigate = useNavigate();
+    const { t } = useSitePreferences();
 
     const [quantity, setQuantity] = useState("1");
     const [cartStatus, setCartStatus] = useState("idle"); // idle | adding | added
     const [addedQty, setAddedQty] = useState(1);
     const [flyKey, setFlyKey] = useState(0);
-    const [favorite, setFavorite] = useState(false);
+    const [favoriteAnimationKey, setFavoriteAnimationKey] = useState(0);
+    const previousFavorite = useRef(isFavourite);
 
     const timers = useRef([]);
 
@@ -29,18 +38,36 @@ export default function ProductCard({ product, onAddToCart }) {
         return () => timers.current.forEach(clearTimeout);
     }, []);
 
+    useEffect(() => {
+        if (previousFavorite.current !== isFavourite) {
+            previousFavorite.current = isFavourite;
+            setFavoriteAnimationKey((key) => key + 1);
+        }
+    }, [isFavourite]);
+
     if (!product) return null;
 
     const image = resolveProductImage(product);
+    const favorite = isFavourite;
+    const reviewCount = Number(product.review_count) || 0;
+    const rating = Number(product.rating_average);
+    const hasRating = reviewCount > 0 && Number.isFinite(rating);
 
-    const stock = Number(product.stock) || 0;
-    const inStock = stock > 0;
-    const maxQty = Math.max(stock, 1);
+    const stock = Number(product.stock);
+    const stockKnown =
+        product.stock !== null &&
+        product.stock !== undefined &&
+        product.stock !== "" &&
+        Number.isSafeInteger(stock) &&
+        stock >= 0;
+    const inStock = stockKnown && stock > 0;
+    const maxQty = inStock ? stock : 1;
 
-    const currentPrice = product.discount_price || product.price;
+    const currentPrice = product.discount_price ?? product.price;
 
     const hasDiscount =
-        product.discount_price &&
+        product.discount_price !== null &&
+        product.discount_price !== undefined &&
         Number(product.discount_price) < Number(product.price);
 
     const discountPercent = hasDiscount
@@ -103,6 +130,12 @@ export default function ProductCard({ product, onAddToCart }) {
         );
     };
 
+    const handleFavouriteClick = (event) => {
+        stop(event);
+        if (isBusy) return;
+        onToggleFavourite?.(product);
+    };
+
     const openProduct = () => navigate(`/products/${product.uuid}`);
 
     const stop = (e) => e.stopPropagation();
@@ -138,17 +171,16 @@ export default function ProductCard({ product, onAddToCart }) {
 
                 <button
                     type="button"
-                    className={`favorite-btn ${favorite ? "is-active" : ""}`}
+                    className={`favorite-btn${favorite ? " is-active" : ""}${favoriteAnimationKey ? " has-favorite-animation" : ""}`}
                     aria-label={
-                        favorite ? "Remove from favourites" : "Add to favourites"
+                        favorite ? t("Remove from favourites") : t("Add to favourites")
                     }
                     aria-pressed={favorite}
-                    onClick={(e) => {
-                        stop(e);
-                        setFavorite((f) => !f);
-                    }}
+                    disabled={isBusy}
+                    onClick={handleFavouriteClick}
                 >
                     <Heart
+                        key={favoriteAnimationKey}
                         size={18}
                         fill={favorite ? "currentColor" : "none"}
                     />
@@ -156,7 +188,7 @@ export default function ProductCard({ product, onAddToCart }) {
 
                 <div className="view-product">
                     <Eye size={14} />
-                    View Product
+                    {t("View Product")}
                 </div>
 
                 {/* Flying product on add */}
@@ -174,18 +206,27 @@ export default function ProductCard({ product, onAddToCart }) {
             {/* Info */}
             <div className="product-info">
                 <span className="product-category">
-                    {product.category?.name || "Uncategorized"}
+                    {product.category?.name || t("Uncategorized")}
                 </span>
 
                 <h3 className="product-title">{product.name}</h3>
 
                 <div className="product-rating">
-                    <div className="stars">
+                    <div
+                        className="stars"
+                        aria-label={
+                            hasRating
+                                ? `${rating.toFixed(1)} out of 5`
+                                : t("No ratings yet")
+                        }
+                    >
                         <Star size={14} fill="currentColor" />
-                        <span>4.8</span>
+                        <span>{hasRating ? rating.toFixed(1) : "—"}</span>
                     </div>
 
-                    <span className="reviews">(24 reviews)</span>
+                    <span className="reviews">
+                        ({reviewCount} {t(reviewCount === 1 ? "review" : "reviews")})
+                    </span>
                 </div>
 
                 {/* Price + Quantity (same row) */}
@@ -213,7 +254,7 @@ export default function ProductCard({ product, onAddToCart }) {
                                 type="button"
                                 onClick={decreaseQty}
                                 disabled={!inStock || (Number(quantity) || 0) <= 1}
-                                aria-label="Decrease quantity"
+                                aria-label={t("Decrease quantity")}
                             >
                                 <Minus size={13} />
                             </button>
@@ -228,7 +269,7 @@ export default function ProductCard({ product, onAddToCart }) {
                                 onKeyDown={(e) => {
                                     if (e.key === "Enter") handleAddToCart();
                                 }}
-                                aria-label="Quantity"
+                                aria-label={t("Quantity")}
                             />
 
                             <button
@@ -237,7 +278,7 @@ export default function ProductCard({ product, onAddToCart }) {
                                 disabled={
                                     !inStock || (Number(quantity) || 0) >= maxQty
                                 }
-                                aria-label="Increase quantity"
+                                aria-label={t("Increase quantity")}
                             >
                                 <Plus size={13} />
                             </button>
@@ -258,17 +299,21 @@ export default function ProductCard({ product, onAddToCart }) {
 
                         <span className="cart-state cart-state-idle">
                             <ShoppingCart size={16} />
-                            {inStock ? "Add to cart" : "Out of stock"}
+                            {inStock
+                                ? t("Add to cart")
+                                : stockKnown
+                                    ? t("Out of stock")
+                                    : t("Availability unavailable")}
                         </span>
 
                         <span className="cart-state cart-state-adding">
                             <ShoppingCart size={16} className="cart-driving" />
-                            Adding
+                            {t("Adding")}
                         </span>
 
                         <span className="cart-state cart-state-added">
                             <Check size={16} className="cart-check" />
-                            Added to cart
+                            {t("Added to cart")}
                         </span>
 
                         <span
@@ -282,6 +327,21 @@ export default function ProductCard({ product, onAddToCart }) {
 
                 {inStock && stock <= 5 && (
                     <span className="low-stock">Only {stock} left</span>
+                )}
+                {stockKnown && stock > 5 && (
+                    <span className="stock-status is-available">
+                        In stock - {stock} available
+                    </span>
+                )}
+                {stockKnown && stock === 0 && (
+                    <span className="stock-status is-unavailable">
+                        {t("Out of stock")}
+                    </span>
+                )}
+                {!stockKnown && (
+                    <span className="stock-status is-unknown">
+                        {t("Availability unavailable")}
+                    </span>
                 )}
             </div>
         </article>

@@ -12,6 +12,7 @@ import {
 
 import { registerUser } from "../api";
 import { useNotifications } from "../context/NotificationContext";
+import { useSitePreferences } from "../context/SitePreferencesContext";
 import "./Auth.css";
 
 const Register = () => {
@@ -30,6 +31,7 @@ const Register = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const { error: showError, success: showSuccess } = useNotifications();
+    const { t } = useSitePreferences();
 
     const handleChange = (event) => {
 
@@ -70,19 +72,19 @@ const Register = () => {
         <section className="auth-page auth-register-page">
             <div className="auth-card">
                 <div className="auth-heading">
-                    <span className="auth-kicker">JOIN CLARE</span>
-                    <h1>Create Account</h1>
-                    <p>Create an account to manage your Clare shopping experience.</p>
+                    <span className="auth-kicker">{t("JOIN CLARE")}</span>
+                    <h1>{t("Create Account")}</h1>
+                    <p>{t("Create an account to manage your Clare shopping experience.")}</p>
                 </div>
 
                 <form onSubmit={handleSubmit}>
 
                     <label className="auth-field">
-                        <span>Username</span>
+                        <span>{t("Username")}</span>
                         <FiUser />
                         <input
                             name="username"
-                            placeholder="Choose a username"
+                            placeholder={t("Choose a username")}
                             value={form.username}
                             onChange={handleChange}
                             required
@@ -91,22 +93,22 @@ const Register = () => {
 
                     <div className="auth-name-grid">
                         <label className="auth-field">
-                            <span>First name</span>
+                            <span>{t("First name")}</span>
                             <FiUser />
                             <input
                                 name="first_name"
-                                placeholder="First name"
+                                placeholder={t("First name")}
                                 value={form.first_name}
                                 onChange={handleChange}
                             />
                         </label>
 
                         <label className="auth-field">
-                            <span>Last name</span>
+                            <span>{t("Last name")}</span>
                             <FiUser />
                             <input
                             name="last_name"
-                            placeholder="Last name"
+                            placeholder={t("Last name")}
                             value={form.last_name}
                             onChange={handleChange}
                             />
@@ -115,22 +117,22 @@ const Register = () => {
                     </div>
 
                     <label className="auth-field">
-                        <span>Email</span>
+                        <span>{t("Email")}</span>
                         <FiMail />
                         <input name="email" type="email" placeholder="you@example.com" value={form.email} onChange={handleChange} required />
                     </label>
 
                     <label className="auth-field">
-                        <span>Phone</span>
+                        <span>{t("Phone")}</span>
                         <FiPhone />
                         <input name="phone" placeholder="+993..." value={form.phone} onChange={handleChange} required />
                     </label>
 
                     <label className="auth-field">
-                        <span>Password</span>
+                        <span>{t("Password")}</span>
                         <FiLock />
-                        <input name="password" type={showPassword ? "text" : "password"} placeholder="Create a password" value={form.password} onChange={handleChange} required />
-                        <button className="password-toggle" type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={showPassword ? "Hide password" : "Show password"}>
+                        <input name="password" type={showPassword ? "text" : "password"} placeholder={t("Create a password")} value={form.password} onChange={handleChange} required />
+                        <button className="password-toggle" type="button" onClick={() => setShowPassword((visible) => !visible)} aria-label={t(showPassword ? "Hide password" : "Show password")}>
                             {showPassword ? <FiEyeOff /> : <FiEye />}
                         </button>
                     </label>
@@ -138,17 +140,17 @@ const Register = () => {
                     <button className="auth-submit" type="submit" disabled={loading}>
                         <FiAtSign />
                         {loading
-                            ? "Creating..."
-                            : "Create Account"}
+                            ? t("Creating...")
+                            : t("Create Account")}
                     </button>
 
                 </form>
 
 
                 <p className="auth-footer-text">
-                    Already have an account?{" "}
+                    {t("Already have an account?")}{" "}
                     <Link to="/login/">
-                        Login
+                        {t("Login")}
                     </Link>
                 </p>
 

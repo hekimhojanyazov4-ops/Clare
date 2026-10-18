@@ -7,11 +7,14 @@ import {
     FiSearch,
     FiShoppingBag,
     FiShoppingCart,
+    FiMoon,
+    FiSun,
     FiUser,
     FiX,
 } from "react-icons/fi";
 
 import { getCart, getCategories, getFavourites } from "../api";
+import { LANGUAGES, useSitePreferences } from "../context/SitePreferencesContext";
 import "./NavBar.css";
 
 const countCartItems = (cart) => {
@@ -37,6 +40,7 @@ const NavBar = () => {
     const [categoryError, setCategoryError] = useState("");
     const [counts, setCounts] = useState({ cart: null, favourites: null });
     const [countError, setCountError] = useState("");
+    const { language, setLanguage, theme, toggleTheme, t } = useSitePreferences();
 
     const user = (() => {
         try {
@@ -137,13 +141,34 @@ const NavBar = () => {
             <div className="announcement-bar">
                 <div className="store-container announcement-inner">
                     <p>
-                        Free Express Shipping on orders $200!
-                        <Link to="/products/">Click and Shop Now.</Link>
+                        {t("Free Express Shipping on orders $200!")}
+                        <Link to="/products/">{t("Click and Shop Now.")}</Link>
                     </p>
                     <div className="announcement-options">
-                        <NavLink to="/orders/">My Orders</NavLink>
-                        <span>English</span>
-                        <span>USD</span>
+                        <NavLink to="/orders/">{t("My Orders")}</NavLink>
+                        <label className="language-control">
+                            <span className="visually-hidden">{t("Language")}</span>
+                            <select
+                                aria-label={t("Language")}
+                                value={language}
+                                onChange={(event) => setLanguage(event.target.value)}
+                            >
+                                {LANGUAGES.map((option) => (
+                                    <option key={option.code} value={option.code}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
+                        <button
+                            className="theme-toggle"
+                            type="button"
+                            onClick={toggleTheme}
+                            aria-label={t(theme === "dark" ? "Switch to light mode" : "Switch to dark mode")}
+                            title={t(theme === "dark" ? "Switch to light mode" : "Switch to dark mode")}
+                        >
+                            {theme === "dark" ? <FiSun aria-hidden="true" /> : <FiMoon aria-hidden="true" />}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -155,28 +180,28 @@ const NavBar = () => {
                     </Link>
 
                     <form className="store-search" role="search" onSubmit={submitSearch}>
-                        <button className="search-submit" type="submit" aria-label="Search products">
+                        <button className="search-submit" type="submit" aria-label={t("Search products")}>
                             <FiSearch aria-hidden="true" />
                         </button>
                         <input
                             type="search"
                             value={search}
                             onChange={(event) => setSearch(event.target.value)}
-                            placeholder="Search your favorite product..."
-                            aria-label="Search products"
+                            placeholder={t("Search your favorite product...")}
+                            aria-label={t("Search products")}
                         />
                     </form>
 
                     <div className="header-actions">
                         <Link className="header-action" to={accountPath} aria-label="Account">
                             <FiUser aria-hidden="true" />
-                            <span>Account</span>
+                            <span>{t("Account")}</span>
                         </Link>
-                        <Link className="header-icon-action" to="/favourites/" aria-label={`Favourites${counts.favourites === null ? "" : `, ${counts.favourites} items`}`}>
+                        <Link className="header-icon-action" to="/favourites/" aria-label={`${t("Favourites")}${counts.favourites === null ? "" : `, ${counts.favourites} items`}`}>
                             <FiHeart aria-hidden="true" />
                             {counts.favourites > 0 && <span className="action-count">{counts.favourites}</span>}
                         </Link>
-                        <Link className="header-icon-action" to="/cart/" aria-label={`Shopping cart${counts.cart === null ? "" : `, ${counts.cart} items`}`}>
+                        <Link className="header-icon-action" to="/cart/" aria-label={`${t("Shopping cart")}${counts.cart === null ? "" : `, ${counts.cart} items`}`}>
                             <FiShoppingCart aria-hidden="true" />
                             {counts.cart > 0 && <span className="action-count">{counts.cart}</span>}
                         </Link>
@@ -194,12 +219,12 @@ const NavBar = () => {
                         onClick={() => toggleMenu("nav-categories")}
                     >
                         <FiMenu aria-hidden="true" />
-                        All Categories
+                        {t("All Categories")}
                         <FiChevronDown aria-hidden="true" />
                     </button>
                     {openMenu === "nav-categories" && (
                         <div className="header-dropdown nav-category-dropdown">
-                            <Link to="/products/">All products</Link>
+                            <Link to="/products/">{t("All products")}</Link>
                             {categories.map((category) => (
                                 <Link
                                     key={category.uuid}
@@ -215,38 +240,38 @@ const NavBar = () => {
                     <button
                         type="button"
                         className="mobile-menu-toggle"
-                        aria-label={menuOpen ? "Close navigation" : "Open navigation"}
+                        aria-label={t(menuOpen ? "Close navigation" : "Open navigation")}
                         aria-expanded={menuOpen}
                         onClick={() => setMenuOpen((open) => !open)}
                     >
                         {menuOpen ? <FiX /> : <FiMenu />}
-                        <span>Menu</span>
+                        <span>{t("Menu")}</span>
                     </button>
 
                     <div className="navigation-links">
-                        <NavLink to="/home/">Home</NavLink>
-                        <NavLink to="/products/">Shop</NavLink>
+                        <NavLink to="/home/">{t("Home")}</NavLink>
+                        <NavLink to="/products/">{t("Shop")}</NavLink>
                         <div className="pages-menu">
                             <button
                                 type="button"
                                 aria-expanded={openMenu === "pages"}
                                 onClick={() => toggleMenu("pages")}
                             >
-                                Pages <FiChevronDown aria-hidden="true" />
+                                {t("Pages")} <FiChevronDown aria-hidden="true" />
                             </button>
                             {openMenu === "pages" && (
                                 <div className="header-dropdown pages-dropdown">
-                                    <Link to="/orders/">Orders</Link>
-                                    <Link to="/payments/">Payments</Link>
-                                    <Link to="/favourites/">Favourites</Link>
-                                    {isAdmin && <Link to="/admin/">Admin</Link>}
+                                    <Link to="/orders/">{t("Orders")}</Link>
+                                    <Link to="/payments/">{t("Payments")}</Link>
+                                    <Link to="/favourites/">{t("Favourites")}</Link>
+                                    {isAdmin && <Link to="/admin/">{t("Admin")}</Link>}
                                 </div>
                             )}
                         </div>
                     </div>
 
                     <Link to="/products/" className="navigation-shop-button">
-                        Shop now <FiShoppingBag aria-hidden="true" />
+                        {t("Shop now")} <FiShoppingBag aria-hidden="true" />
                     </Link>
                 </div>
             </nav>
