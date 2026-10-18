@@ -1418,6 +1418,391 @@
 	color: #356da8;
 }
 
+/*
+ * Admin color tokens.  This layer is deliberately scoped to the admin shell:
+ * it keeps the store's visual system independent while ensuring every route
+ * rendered by AdminLayout shares the same palette.
+ */
+.admin-layout {
+	--admin-page: #f8f7f5;
+	--admin-surface: #ffffff;
+	--admin-surface-muted: #faf8f5;
+	--admin-control: #ffffff;
+	--admin-control-muted: #f1f0ed;
+	--admin-sidebar-surface: #20262d;
+	--admin-sidebar-hover: #313a45;
+	--admin-sidebar-text: #f7f8fa;
+	--admin-sidebar-muted: #bfc7d0;
+	--admin-ink: #111111;
+	--admin-muted: #77716a;
+	--admin-line: #eeeae5;
+	--admin-line-strong: #e5e1da;
+	--admin-orange: #ffb629;
+	--admin-orange-hover: #eda714;
+	--admin-on-accent: #171717;
+	--admin-focus: rgb(217 167 62 / 50%);
+	--admin-shadow: 0 14px 36px rgb(32 38 45 / 7%);
+	--admin-danger: #c8403a;
+	--admin-danger-surface: #fff0ef;
+	--admin-warning-surface: #fff8e9;
+	--admin-warning-text: #a87000;
+	--admin-info-surface: #edf4ff;
+	--admin-info-text: #356da8;
+	--admin-success-surface: #edf7ef;
+	--admin-success-text: #2d7a42;
+}
+
+.admin-language-control select,
+.admin-theme-toggle {
+	min-height: 34px;
+	border: 1px solid var(--admin-line-strong);
+	border-radius: 6px;
+	background: var(--admin-control);
+	color: var(--admin-ink);
+	font: inherit;
+}
+
+.admin-language-control select {
+	max-width: 105px;
+	padding: 0 7px;
+}
+
+.admin-theme-toggle {
+	display: inline-grid;
+	width: 36px;
+	height: 36px;
+	place-items: center;
+	cursor: pointer;
+}
+
+html[data-theme="dark"] .admin-layout {
+	--admin-page: #12171c;
+	--admin-surface: #1b2229;
+	--admin-surface-muted: #202830;
+	--admin-control: #202830;
+	--admin-control-muted: #29333d;
+	--admin-sidebar-surface: #151b21;
+	--admin-sidebar-hover: #2a3540;
+	--admin-sidebar-text: #f2f5f7;
+	--admin-sidebar-muted: #b8c1ca;
+	--admin-ink: #f3f6f8;
+	--admin-muted: #b7c0c9;
+	--admin-line: #35404a;
+	--admin-line-strong: #46525e;
+	--admin-orange: #ffbd38;
+	--admin-orange-hover: #ffcb59;
+	--admin-on-accent: #17130a;
+	--admin-focus: rgb(255 189 56 / 52%);
+	--admin-shadow: 0 16px 38px rgb(0 0 0 / 24%);
+	--admin-danger: #ff817b;
+	--admin-danger-surface: #482525;
+	--admin-warning-surface: #3b3020;
+	--admin-warning-text: #ffd47e;
+	--admin-info-surface: #1f344a;
+	--admin-info-text: #9bc9ff;
+	--admin-success-surface: #1d3a2d;
+	--admin-success-text: #94dcad;
+
+	background: var(--admin-page);
+	color: var(--admin-ink);
+}
+
+html[data-theme="dark"] .admin-layout,
+html[data-theme="dark"] .admin-layout .admin-content,
+html[data-theme="dark"] .admin-layout .admin-main {
+	background: var(--admin-page);
+	color: var(--admin-ink);
+}
+
+html[data-theme="dark"] .admin-layout .admin-sidebar {
+	background: var(--admin-sidebar-surface);
+	color: var(--admin-sidebar-text);
+	border-color: var(--admin-line);
+}
+
+html[data-theme="dark"] .admin-layout .admin-brand,
+html[data-theme="dark"] .admin-layout .admin-header {
+	border-color: var(--admin-line);
+}
+
+html[data-theme="dark"] .admin-layout .admin-header,
+html[data-theme="dark"] .admin-layout :is(
+	.admin-panel,
+	.admin-table-container,
+	.admin-empty-state,
+	.admin-stat-card,
+	.confirm-modal,
+	.users-toolbar
+) {
+	background: var(--admin-surface);
+	color: var(--admin-ink);
+	border-color: var(--admin-line);
+	box-shadow: var(--admin-shadow);
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-page-header h1,
+	.admin-page-heading h1,
+	.admin-header-title strong,
+	.admin-account strong,
+	.admin-stat-card > strong,
+	.admin-panel-heading h2,
+	.admin-empty-state h3,
+	.admin-error-state h3,
+	.confirm-modal h2,
+	.table-user strong,
+	.admin-table td
+) {
+	color: var(--admin-ink);
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-page-header p,
+	.admin-brand span,
+	.admin-header-title span,
+	.admin-account span,
+	.admin-result-count,
+	.admin-empty-state p,
+	.admin-error-state p,
+	.confirm-modal p,
+	.admin-panel-heading p,
+	.table-user small,
+	.chart-empty
+) {
+	color: var(--admin-muted);
+}
+
+html[data-theme="dark"] .admin-layout .admin-sidebar :is(
+	.admin-brand strong,
+	.admin-sidebar-link,
+	.sidebar-bottom button
+) {
+	color: var(--admin-sidebar-muted);
+}
+
+html[data-theme="dark"] .admin-layout .admin-sidebar .admin-brand strong,
+html[data-theme="dark"] .admin-layout .admin-sidebar-link:hover,
+html[data-theme="dark"] .admin-layout .admin-sidebar-link.active,
+html[data-theme="dark"] .admin-layout .sidebar-bottom button:hover {
+	color: var(--admin-sidebar-text);
+}
+
+html[data-theme="dark"] .admin-layout .admin-sidebar-link:hover,
+html[data-theme="dark"] .admin-layout .admin-sidebar-link.active,
+html[data-theme="dark"] .admin-layout .sidebar-bottom button:hover {
+	background: var(--admin-sidebar-hover);
+}
+
+html[data-theme="dark"] .admin-layout .admin-sidebar-link.active {
+	box-shadow: inset 3px 0 var(--admin-orange);
+}
+
+html[data-theme="dark"] .admin-layout .admin-table th {
+	background: var(--admin-surface-muted);
+	color: var(--admin-muted);
+}
+
+html[data-theme="dark"] .admin-layout .admin-table :is(th, td) {
+	border-color: var(--admin-line);
+}
+
+html[data-theme="dark"] .admin-layout .admin-table tbody tr:hover {
+	background: #26313a;
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-search,
+	.admin-filter,
+	.admin-search-input,
+	.admin-account,
+	.admin-secondary-btn,
+	.admin-header-icon,
+	.mobile-menu-btn,
+	.admin-logout-link,
+	.admin-language-control select,
+	.admin-theme-toggle,
+	.admin-edit-form input,
+	.admin-edit-form select,
+	.admin-edit-form textarea
+) {
+	background: var(--admin-control);
+	color: var(--admin-ink);
+	border-color: var(--admin-line-strong);
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-search input,
+	.admin-search-input input,
+	.admin-filter select
+) {
+	background: transparent;
+	color: var(--admin-ink);
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-search input,
+	.admin-search-input input,
+	.admin-edit-form input,
+	.admin-edit-form textarea
+)::placeholder {
+	color: #9ca8b2;
+}
+
+html[data-theme="dark"] .admin-layout :is(select, select option) {
+	background: var(--admin-control);
+	color: var(--admin-ink);
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-secondary-btn:hover,
+	.admin-header-icon:hover,
+	.mobile-menu-btn:hover,
+	.admin-logout-link:hover,
+	.admin-search-input button:hover
+) {
+	background: var(--admin-control-muted);
+	border-color: var(--admin-orange);
+	color: var(--admin-orange-hover);
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-primary-btn,
+	.admin-retry-btn,
+	.admin-brand-logo
+) {
+	background: var(--admin-orange);
+	color: var(--admin-on-accent);
+	border-color: var(--admin-orange);
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-primary-btn:hover,
+	.admin-retry-btn:hover
+) {
+	background: var(--admin-orange-hover);
+	color: var(--admin-on-accent);
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-account-avatar,
+	.stat-card-icon,
+	.user-avatar,
+	.confirm-icon
+) {
+	background: var(--admin-warning-surface);
+	color: var(--admin-warning-text);
+}
+
+html[data-theme="dark"] .admin-layout .admin-inline-error {
+	background: var(--admin-danger-surface);
+	color: #ffb4b0;
+	border: 1px solid #79413f;
+}
+
+html[data-theme="dark"] .admin-layout .bulk-actions {
+	background: var(--admin-warning-surface);
+	border-color: #725a31;
+	color: var(--admin-warning-text);
+}
+
+html[data-theme="dark"] .admin-layout :is(.bulk-clear-btn, .cancel-btn, .modal-close) {
+	background: var(--admin-control-muted);
+	color: var(--admin-ink);
+}
+
+html[data-theme="dark"] .admin-layout :is(.bulk-delete-btn, .danger-btn) {
+	background: var(--admin-danger);
+	color: #2b0c0b;
+}
+
+html[data-theme="dark"] .admin-layout .table-danger-btn {
+	background: var(--admin-danger-surface);
+	color: var(--admin-danger);
+}
+
+html[data-theme="dark"] .admin-layout .table-danger-btn:hover {
+	background: var(--admin-danger);
+	color: #2b0c0b;
+}
+
+html[data-theme="dark"] .admin-layout .table-edit-btn {
+	background: var(--admin-warning-surface);
+	border-color: #725a31;
+	color: var(--admin-warning-text);
+}
+
+html[data-theme="dark"] .admin-layout .table-edit-btn:hover {
+	background: var(--admin-orange);
+	border-color: var(--admin-orange);
+	color: var(--admin-on-accent);
+}
+
+html[data-theme="dark"] .admin-layout .status-badge {
+	background: var(--admin-success-surface);
+	color: var(--admin-success-text);
+}
+
+html[data-theme="dark"] .admin-layout .status-pending {
+	background: var(--admin-warning-surface);
+	color: var(--admin-warning-text);
+}
+
+html[data-theme="dark"] .admin-layout :is(.status-cancelled, .status-failed) {
+	background: var(--admin-danger-surface);
+	color: #ffb4b0;
+}
+
+html[data-theme="dark"] .admin-layout .status-admin {
+	background: var(--admin-warning-surface);
+	color: var(--admin-warning-text);
+}
+
+html[data-theme="dark"] .admin-layout .status-customer {
+	background: var(--admin-info-surface);
+	color: var(--admin-info-text);
+}
+
+html[data-theme="dark"] .admin-layout .modal-backdrop,
+html[data-theme="dark"] .admin-layout .admin-sidebar-backdrop {
+	background: rgb(2 6 10 / 68%);
+}
+
+html[data-theme="dark"] .admin-layout .admin-loading-state .loading-spinner {
+	border-color: #554722;
+	border-top-color: var(--admin-orange);
+}
+
+html[data-theme="dark"] .admin-layout :is(
+	.admin-sidebar-link,
+	.sidebar-bottom button,
+	.admin-header-icon,
+	.mobile-menu-btn,
+	.admin-primary-btn,
+	.admin-secondary-btn,
+	.admin-retry-btn,
+	.table-edit-btn,
+	.table-danger-btn,
+	.admin-logout-link,
+	.admin-theme-toggle,
+	.admin-language-control select,
+	.admin-edit-form input,
+	.admin-edit-form select,
+	.admin-edit-form textarea,
+	.admin-table input
+):focus-visible,
+html[data-theme="dark"] .admin-layout .admin-search:focus-within,
+html[data-theme="dark"] .admin-layout .admin-filter:focus-within,
+html[data-theme="dark"] .admin-layout .admin-search-input:focus-within {
+	outline: 3px solid var(--admin-focus);
+	outline-offset: 2px;
+	border-color: var(--admin-orange);
+	box-shadow: none;
+}
+
+html[data-theme="dark"] .admin-layout input[type="checkbox"] {
+	accent-color: var(--admin-orange);
+}
+
 @media (max-width: 650px) {
 	.users-toolbar .bulk-actions {
 		margin-left: 0;

@@ -125,29 +125,6 @@ html[data-theme="dark"] .category-filter:hover {
     color: #d4c5ff;
 }
 
-html[data-theme="dark"] .admin-sidebar,
-html[data-theme="dark"] .admin-header,
-html[data-theme="dark"] .admin-content,
-html[data-theme="dark"] .admin-card,
-html[data-theme="dark"] .admin-table-wrapper,
-html[data-theme="dark"] .admin-modal,
-html[data-theme="dark"] .admin-panel,
-html[data-theme="dark"] .admin-layout {
-    background-color: #1b1f23;
-    color: #eceff1;
-    border-color: #353b41;
-}
-
-html[data-theme="dark"] .admin-layout :is(h1, h2, h3, p, span, label, th, td, strong, a) {
-    color: #e7e9eb;
-}
-
-html[data-theme="dark"] .admin-layout :is(input, select, textarea) {
-    background-color: #252a2f;
-    color: #f1f3f4;
-    border-color: #41474e;
-}
-
 html[data-theme="dark"] .home-shell {
     background-color: #121416;
     color: #eceff1;
@@ -164,45 +141,6 @@ html[data-theme="dark"] .home-shell :is(
 
 html[data-theme="dark"] .home-shell :is(h1, h2, h3, h4, p, span, a, strong, small) {
     color: #eceff1;
-}
-
-html[data-theme="dark"] .admin-language-control select,
-html[data-theme="dark"] .admin-theme-toggle {
-    min-height: 34px;
-    border: 1px solid #41474e;
-    border-radius: 6px;
-    background: #252a2f;
-    color: #eceff1;
-}
-
-html[data-theme="dark"] .admin-theme-toggle {
-    display: inline-grid;
-    width: 36px;
-    place-items: center;
-    cursor: pointer;
-}
-
-.admin-language-control select {
-    min-height: 34px;
-    max-width: 105px;
-    padding: 0 7px;
-    border: 1px solid #dce1e6;
-    border-radius: 6px;
-    background: #fff;
-    color: #303841;
-    font: inherit;
-}
-
-.admin-theme-toggle {
-    display: inline-grid;
-    width: 36px;
-    height: 36px;
-    place-items: center;
-    border: 1px solid #dce1e6;
-    border-radius: 6px;
-    background: #fff;
-    color: #303841;
-    cursor: pointer;
 }
 
 html[data-theme="dark"] .store-footer,

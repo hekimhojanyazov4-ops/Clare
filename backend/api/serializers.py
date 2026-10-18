@@ -58,6 +58,21 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def validate_role(self, value):
+        """Keep role changes under administrator control."""
+        request = self.context.get('request')
+        if (
+            self.instance is not None
+            and request is not None
+            and request.user.is_authenticated
+            and not request.user.is_staff
+            and value != self.instance.role
+        ):
+            raise serializers.ValidationError(
+                'Only administrators can change account roles.'
+            )
+        return value
+
 
 
     def update(self, instance, validated_data):
@@ -144,11 +159,19 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_rating_average(self, obj):
         if hasattr(obj, 'rating_average'):
             return obj.rating_average
+        reviews = getattr(obj, '_prefetched_objects_cache', {}).get('reviews')
+        if reviews is not None:
+            if not reviews:
+                return None
+            return sum(review.ratings for review in reviews) / len(reviews)
         return obj.reviews.aggregate(rating_average=Avg('ratings'))['rating_average']
 
     def get_review_count(self, obj):
         if hasattr(obj, 'review_count'):
             return obj.review_count
+        reviews = getattr(obj, '_prefetched_objects_cache', {}).get('reviews')
+        if reviews is not None:
+            return len(reviews)
         return obj.reviews.count()
 
 

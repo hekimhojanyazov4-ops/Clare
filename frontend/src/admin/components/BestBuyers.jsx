@@ -2,14 +2,32 @@ import {
     ResponsiveContainer,
     BarChart,
     Bar,
+    CartesianGrid,
     XAxis,
     YAxis,
     Tooltip,
 } from "recharts";
+import { useSitePreferences } from "../../context/SitePreferencesContext";
 
 export default function BestBuyersChart({
     orders = [],
 }) {
+    const { theme, t } = useSitePreferences();
+    const chartTheme = theme === "dark"
+        ? {
+            axis: "#b7c0c9",
+            grid: "#35404a",
+            tooltipBackground: "#20272e",
+            tooltipBorder: "#46525e",
+            tooltipText: "#f3f5f7",
+        }
+        : {
+            axis: "#625e58",
+            grid: "#e7e3dc",
+            tooltipBackground: "#ffffff",
+            tooltipBorder: "#e5e1da",
+            tooltipText: "#20262d",
+        };
 
     const buyerMap = {};
 
@@ -75,7 +93,7 @@ export default function BestBuyersChart({
     if (!data.length) {
         return (
             <div className="chart-empty">
-                No buyer data available.
+                {t("No buyer data available.")}
             </div>
         );
     }
@@ -98,20 +116,42 @@ export default function BestBuyersChart({
                     }}
                 >
 
-                    <XAxis
-                        dataKey="name"
+                    <CartesianGrid
+                        vertical={false}
+                        stroke={chartTheme.grid}
+                        strokeDasharray="3 3"
                     />
 
-                    <YAxis />
+                    <XAxis
+                        dataKey="name"
+                        tick={{ fill: chartTheme.axis, fontSize: 11 }}
+                        axisLine={{ stroke: chartTheme.grid }}
+                        tickLine={false}
+                    />
+
+                    <YAxis
+                        tick={{ fill: chartTheme.axis, fontSize: 11 }}
+                        axisLine={false}
+                        tickLine={false}
+                    />
 
                     <Tooltip
                         formatter={(value) =>
                             `$${Number(value).toLocaleString()}`
                         }
+                        contentStyle={{
+                            background: chartTheme.tooltipBackground,
+                            border: `1px solid ${chartTheme.tooltipBorder}`,
+                            borderRadius: 6,
+                            color: chartTheme.tooltipText,
+                        }}
+                        itemStyle={{ color: chartTheme.tooltipText }}
+                        labelStyle={{ color: chartTheme.tooltipText }}
                     />
 
                     <Bar
                         dataKey="amount"
+                        fill="#ffb629"
                         radius={[
                             7,
                             7,

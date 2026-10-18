@@ -111,13 +111,18 @@ class ProductViewSet(viewsets.ModelViewSet):
 # ================= CART =================
 class CartViewSet(viewsets.GenericViewSet):
     serializer_class = CartSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    # A cart is private customer data. Relying on the global read-only
+    # permission allowed anonymous GET requests to reach a user-bound queryset.
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        queryset = Cart.objects.prefetch_related(
+        queryset = Cart.objects.select_related('customer').prefetch_related(
             Prefetch(
                 'cart_items',
-                queryset=CartItem.objects.select_related('product__category')
+                queryset=CartItem.objects.select_related('product__category').prefetch_related(
+                    'product__images',
+                    'product__reviews',
+                )
             )
         )
         if self.request.user.is_staff:
@@ -211,14 +216,17 @@ class CartViewSet(viewsets.GenericViewSet):
 # ================= CART ITEM (ayratyn) =================
 class CartItemViewSet(viewsets.ModelViewSet):
     serializer_class = CartItemSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
     lookup_field = 'uuid'
     http_method_names = ['get', 'patch', 'delete', 'head', 'options']
 
     def get_queryset(self):
         return CartItem.objects.filter(
             cart__customer=self.request.user
-        ).select_related('product__category')
+        ).select_related('product__category').prefetch_related(
+            'product__images',
+            'product__reviews',
+        )
 
     def get_serializer_class(self):
         if self.action == 'partial_update':
@@ -247,13 +255,16 @@ class OrderViewSet(viewsets.GenericViewSet):
     lookup_field = 'uuid'
 
     def get_queryset(self):
-        queryset = Order.objects.all()
+        queryset = Order.objects.select_related('customer')
         if not self.request.user.is_staff:
             queryset = queryset.filter(customer=self.request.user)
         return queryset.prefetch_related(
             Prefetch(
                 'order_items',
-                queryset=OrderItem.objects.select_related('product__category')
+                queryset=OrderItem.objects.select_related('product__category').prefetch_related(
+                    'product__images',
+                    'product__reviews',
+                )
             )
         )
 
@@ -486,7 +497,13 @@ class FavouriteViewSet(viewsets.ModelViewSet):
     lookup_field = 'uuid'
 
     def get_queryset(self):
-        queryset = Favourite.objects.select_related('product__category', 'user')
+        queryset = Favourite.objects.select_related(
+            'product__category',
+            'user',
+        ).prefetch_related(
+            'product__images',
+            'product__reviews',
+        )
         if self.request.user.is_staff:
             return queryset
         return queryset.filter(user=self.request.user)

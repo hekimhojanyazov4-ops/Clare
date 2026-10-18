@@ -1,4 +1,6 @@
 import uuid
+from decimal import Decimal
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator
@@ -182,7 +184,11 @@ class Payment(UUIDModel):
         on_delete=models.CASCADE,
         related_name='payments'
     )
-    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.01)])
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))],
+    )
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     order = models.OneToOneField(
         Order,
